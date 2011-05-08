@@ -27,6 +27,7 @@ We can store de bruijn graphs in Bloom filters which gives us a fast and lightwe
 
 \begin{figure}
 \center{\includegraphics[width=5in]{figures/f1}}
+\caption{Bloom filter.}
 \end{figure}
 
 \subsection{Effect of false positives}
@@ -36,11 +37,14 @@ predict in terms of its impact on graph properties.  Link degradation
 to percolation here.
 
 \begin{figure}
-\center{\includegraphics[width=5in]{figures/f2a}}
+\center{\includegraphics[width=5in]{figures/f2b}}
+\caption{Bloom filters scale well.}
 \end{figure}
 
 \begin{figure}
-\center{\includegraphics[width=5in]{figures/f2b}}
+\center{\includegraphics[width=5in]{figures/f2a}}
+\caption{There is a minimum false positive rate for a given amount of memory
+and amount of data, set by the number of hash tables.}
 \end{figure}
 
 
@@ -57,20 +61,26 @@ $< \approx 0.0002$ (data not shown).}
 \end{figure}
 
 \begin{figure}
-\center{\includegraphics[width=5in]{memoryFraction_vs_percolationThreshold}}
-\caption{
-Percolation Threshold Dependence on used memory. This figure shows the
-interpolated critical percolation threshold dependence on the memory used for
-the Bloom filter. $\rho$ is the fraction of maximally required memory for a de
-Bruijn graph with K=12. We reduced the memory allowed $\rho$ from 1.0 to 0.1  (x
-axis). The critical percolation threshold $\theta_{\rm critical}$ was linearly
-interpolated (at the critical point $\theta=0.5$ the slope is infinite allowing
-for this). The std deviation is given for each interpolation. This plot shows a
-linear relation between allowed memory and expected percolation threshold
-assuming random data. We can fit the following function to this plot:
-$\theta_{\rm critical} = 0.209 \rho + 0.0052$ describing the fraction of memory
-where random data would percolate.
-}
+\center{\includegraphics[width=3in]{memoryFraction_vs_percolationThreshold}}
+\caption{The critical point for percolation is linearly related to the
+  compression factor of the graph representation.
+This figure shows
+  the interpolated critical percolation threshold dependence on the
+  memory used for the Bloom filter. $\rho$ is the fraction of
+  maximally required memory ($4^{12}$ bits) for a de Bruijn graph with
+  K=12. We reduced the memory allowed $\rho$ from 1.0 to 0.1 (x
+  axis). The critical percolation threshold $\theta_{\rm critical}$
+  was linearly interpolated (at the critical point $\theta=0.5$ the
+  slope is infinite allowing for this). The std deviation is given for
+  each interpolation. This plot shows a linear relation between
+  allowed memory and expected percolation threshold assuming random
+  data. We can fit the following function to this plot: $\theta_{\rm
+    critical} = 0.209 \rho + 0.0052$ describing the fraction of memory
+  where random data would percolate.  {\bf CTB: this linear result is
+    what you'd expect if the slope of the approach to percolation
+    across increased occupancy is exponential, given the logarithimic
+    false positive rate wrt memory?}}
+
 \end{figure}
 
 \subsection{This can usefully be applied to assembly graphs}
@@ -81,24 +91,20 @@ We can use this to look at local assembly graphs usefully.
 
 \begin{figure}
 \center{\includegraphics[width=5in]{k31}}
+\caption{Approach to critical percolation limit. {\bf Is this an
+    exponential?  Or what?  Might be too sharp for that, but what
+    would the functional form be? Can we fit?  Do we know the constants?}}
 \end{figure}
 
 \paragraph{Large scale graph structure is retained even with high FP rate, out to percolation threshold.}
 
 \begin{figure}
-\center{\includegraphics[width=5in]{figures/f3b001}}
-\end{figure}
-
-\begin{figure}
-\center{\includegraphics[width=5in]{figures/f3b005}}
-\end{figure}
-
-\begin{figure}
-\center{\includegraphics[width=5in]{figures/f3b010}}
-\end{figure}
-
-\begin{figure}
-\center{\includegraphics[width=5in]{figures/f3b015}}
+\includegraphics[width=3in]{figures/f3b001}
+\includegraphics[width=3in]{figures/f3b005}\\
+\includegraphics[width=3in]{figures/f3b010}
+\includegraphics[width=3in]{figures/f3b015}
+\caption{Decreasing fidelity of graph structure with false positive rate.
+{\bf CTB: This should be out first figure, I think!}}
 \end{figure}
 
 
@@ -109,6 +115,9 @@ We can use this to look at local assembly graphs usefully.
 
 \begin{figure}
 \center{\includegraphics[width=5in]{figures/f3d}}
+\caption{Computation required to partition graphs grows with false positive
+rate.  CTB: good to know, but I think this figure can go away; it's implied
+by everything else.}
 \end{figure}
 
 \paragraph{Link error-prone sequencing to percolation threshold?  Error inflates number of unique k-mers being added in => increases memory requirements.}
@@ -120,14 +129,20 @@ that even reasonably high sequencing error rate would not percolate?)
 
 \begin{figure}
 \center{\includegraphics[width=5in]{contigEnvironment}}
+\caption{Number of false connections introduced by inexact k-mer storage.
+k = ??}
 \end{figure}
 
 \begin{figure}
 \center{\includegraphics[width=5in]{fractionOfFoundDoubleHitsECOLI}}
+\caption{The difference between exact and inexact kmer storage for the
+ecoli genome. k = ??}
 \end{figure}
 
 \begin{figure}
 \center{\includegraphics[width=5in]{fractionOfFoundDoubleHitsYEAST}}
+\caption{The difference between exact and inexact kmer storage for the
+yeast genome. k = ??}
 \end{figure}
 
 Idea for last graph:
