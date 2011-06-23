@@ -412,4 +412,106 @@ average neighbors per vertex changes. Ultimately, we would be able to
 argue that the number of erroneous k-mers created by Illumina
 sequencing eclipses that of what is created using our approach.
 
+\section{Discussion}
+
+\subsection{Bloom filters can be used to accurately store large assembly
+graphs}
+
+The compressible graph representation we have built on a Bloom filter
+is an efficient way to store and traverse k-mer graphs.  Per k-mer
+memory usage is low, and independent of k, while k-mer node lookup and
+local traversal are constant time.  The primary data structure can
+also be implemented in constant memory.  This graph representation is
+also extremely simple to implement and verify.
+
+The probabilistic nature of the data structure is a significant
+concern, but the collision rate and resulting increase in false local
+connectivity are very predictable.  On a larger scale, we can link the
+rate of increase in global connectivity from false positives to a
+first-order phase transition, which lets us define a broad range of
+parameters for which global graph structure is extremely accurate.
+
+The effect of increasing false positive rate as ``error'' can be
+compared to the effect of sequencing errors.  Sequencing error
+introduces both false negatives (by eliminating ``true'' k-mers from
+low coverage samples) and false positives.  False positives and
+negatives from sequencing errors also often result in k-mers that are
+a low Hamming distance from the true k-mer, which can result in
+elaborate graph structures.  In contrast, the Bloom graph error is
+entirely one-sided, only resulting in false positives; moreover, these
+false positives are uncorrelated to the ``true'' k-mers from which
+they arise, and do not generally contribute to local graph structure.
+
+Overall, the Bloom k-mer graph is an efficient data structure for
+storing and traversing large k-mer graphs.
+
+\subsection{Using Bloom k-mer graphs for DNA sequence assembly}
+
+Bloom k-mer graphs may not be directly useful for traditional
+approaches to DNA assembly, which rely on systematic heuristic
+transformations of graph structure to find an optimal path through the
+graph.  This is because the Bloom graph, as presented here, is limited
+to representing k-mer graphs for a fixed k, and paths cannot readily
+be compacted or eliminated.
+
+There are many uses, however, for an extremely scalable
+constant-memory graph representation.  Below we discuss the use of the
+Bloom k-mer graph data structure as a lens for exploring graph
+properties and filtering data sets.
+
+For low-coverage samples, assembly graphs may contain many small
+unconnected components, that represent unconnected sequences.
+Sequences contributing to these unconnected components can be safely
+eliminated from the originating data sets without affecting the final
+assembly.  This can be done efficiently with a simple limited depth
+graph search algorithm.
+
+More generally, assembly graphs may contain many disconnected
+subgraphs, due to the structure of the source data (e.g. transcriptome
+or population sequencing) or because of low coverage.  These subgraphs
+can safely be partitioned into different graphs without affecting the
+final assembly, reducing the memory and computation required for
+assembly of the whole to that required for the largest subgraph.
+(@@ Discuss iteration here as a way to get rid of false positives.)
+
+The Bloom k-mer graph can also be used to do de novo repeat discovery
+in collections of unassembled reads.  This in turn can be applied to
+filtering of repeats prior to assembly (ref Hydyra), or for isolating
+repeats from shallow or exploratory sequencing efforts.
+
+It should also be possible to adapt sequence structure (e.g. ORF),
+homology (BLAST), and domain search (HMMER) algorithms to search this
+graph structure instead of searching either unassembled reads or
+assemblies.  Because assembly graphs implicitly collapse identical
+sequences into a single path, this may be a more scalable approach to
+targetted-gene analysis for metagenomics than current approaches
+(which rely on searching individual reads).  Also note that, unlike
+sequencing errors, the false positives in the Bloom graph will
+generally bear no resemblance to biologically valid matches.
+
+The Bloom k-mer graph could also be used to develop connectivity-based
+read trimming and correction algorithms.  For example, low-abundance
+reads that contribute to ``spurs'' or ``sidings'' in otherwise
+high-coverage regions could be corrected to match the
+consensus, or trimmed to eliminate the divergent sequence.
+
+One particularly intriguing option is to use the memory-efficient and
+scalable Bloom k-mer graph representation as a component of a hybrid
+assembler.  The k-mer graph approach could be used to identify
+reads that belong to high-complexity regions, and extract them for
+later resolution with more targetted approaches, e.g. an OLC assembler.
+
+\subsection{Dramatic scaling}
+
+We need to mention dramatic scaling!
+
+Also address integration of longer reads, perhaps in the introduction
+(aka why we will care even after PacBio)
+
+\subsection{Acknowledgements}
+
+Jim Cole and Jordan Fish.  Qingpeng.  Adina.
+
 \end{document}
+
+%% do we want to explore for larger S?  Does false positive rate change?
