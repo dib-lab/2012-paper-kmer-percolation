@@ -25,13 +25,14 @@ from next-generation sequencing platforms such as Illumina and 454
 analysis (citation). Current algorithms (citation) do not scale well
 enough to handle the expected exponential rise in sequence dataset
 sizes. Additionally, recent sequencing efforts such as the human gut
-microbiome[], cow rumen[], and the human genome[] have required a
+microbiome\cite{pmid20203603}, cow rumen\cite{pmid21273488}, and the 
+human genome\cite{pmid21187386} have required a
 supercomputer with 512GB of memory to construct their
 assemblies. Today, high memory requirement for sequence assembly is
 among the biggest bottlenecks that we face in efficiently analyzing
 sequence data. To resolve this issue, we present a novel application
-of the Bloom filter data structure for storing and traversing de
-Bruijn graphs (citation) in memory, which significantly reduces this
+of the Bloom filter data structure\cite{bloom} for storing and traversing de
+Bruijn graphs in memory, which significantly reduces this
 memory bottleneck problem.
 
 Sequencing projects generally require to assemble a set of DNA
@@ -52,7 +53,8 @@ genome are resolved, and scaffolds between contiguous sequences are
 created. This class of assemblers are generally called
 “Overlap-Layout-Consensus.” Examples include Arachne[], Celera[],
 phrap[], and TIGR[]. Though effective, the OLC approach had drawbacks,
-and a new approach using de Bruijn graphs (DBG) was developed[], which
+and a new approach using de Bruijn graphs (DBG) was 
+developed\cite{pmid11504945}, which
 had a more natural way of handling genomic content such as repetitive
 regions. In a de Bruijn graph approach, reads of length l are broken
 down into words of fixed size k. Assemblers now try to find an Euler
@@ -103,9 +105,10 @@ oracle that can make difinitive “no” answers but only a “maybe”
 instead of a definitive “yes”. Unfortunately the more entries the hash
 table contains the higher the false positive rate. The false positive
 rate for the bloom filter can be calculated by multiplying the hash
-table occupancy of each hash table together (citation). Though Bloom
+table occupancy of each hash table together. Though Bloom
 filters have been used to solve Bioinformatics-related problems in the
-past[], we believe that this is the first attempt to use the data
+past\cite{pmid20426693, pmid20472541, haskell}, 
+we believe that this is the first attempt to use the data
 structure as a method of graph traversal.
 
 We have developed a software package named khmer, which we use for
@@ -512,6 +515,8 @@ Also address integration of longer reads, perhaps in the introduction
 
 Jim Cole and Jordan Fish.  Qingpeng.  Adina.
 
-\end{document}
-
 %% do we want to explore for larger S?  Does false positive rate change?
+
+\bibliographystyle{abbrv}
+\bibliography{kmer-percolation}
+\end{document}
