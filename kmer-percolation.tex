@@ -1,3 +1,6 @@
+%% NOTES:
+%%    do we want to explore for larger S?  Does false positive rate change?
+
 \documentclass[12pt]{article} \usepackage{simplemargins}
 \usepackage[pdftex]{graphicx} \graphicspath{{figures/}}
 
@@ -79,98 +82,22 @@ probabilistic (non accurate) method are neglegable. This implies that
 the use of prbabilistic de Bruijn graphs can drastically reduce the
 memory requirements and thus improve sequence assemblies.
 
-Probabilistic de Bruijn Graph Data Structure
-
-The pupose of the data structure is to efficiently storethe presens of
-k-mers in the de Bruijn graph. One extreme way of storing that data is
-to allocate a bin for each possible k-mer requiring $4^k$ bits which
-gives contant lookup time but is infeasable for large enough k
-(typically k 20-50). The other extreme would use a bin for each
-existing k-mer minimizing the memory requirements but requires linear
-lookup time. Trees or similar structures generally have constant time
-access but their memory is k dependent. All above methods are acurate
-in the sense that a query to the data structure results in a
-definitive answer about the existence of a k-mer.  In contrast to this
-we use a Bloom filter to store k-mers. When a k-mer is added to the
-memory a hashing function is used to map this k-mer into a memory
-space that is smaller then the possible number of k-mers. This hashing
-function possibly adds different k-mers into the same memory bin. At
-the same time, when querying the Bloom filter for a specific k-mer it
-might return a positive answer even though that specific k-mer wasn’t
-present but another one “accidentally” maped into the same bin,
-resulting in a false positve but no false negative rate. This rate can
-be reduced further by using multiple hash tables each with a different
-hashing function. Therefor a Bloom fiter can be understood as an
-oracle that can make difinitive “no” answers but only a “maybe”
-instead of a definitive “yes”. Unfortunately the more entries the hash
-table contains the higher the false positive rate. The false positive
-rate for the bloom filter can be calculated by multiplying the hash
-table occupancy of each hash table together. Though Bloom
-filters have been used to solve Bioinformatics-related problems in the
-past\cite{pmid20426693, pmid20472541, haskell}, 
-we believe that this is the first attempt to use the data
-structure as a method of graph traversal.
-
 We have developed a software package named khmer, which we use for
 filtering of sequence data and for simulating properties of a
 probabilistic de Bruijn graph. It is written in C++ and Python and
 released under the BSD license. It is available at:
 https://github.com/ctb/khmer
 
-Conventionally Bloom filters utilize more then one hashing function to
-reduce the false positive rate, where these different hashing
-functions all write into a common memory space. Here instead each
-hashing function writes into its own space. The false positive rate
-depends on the maximum amount of memory the user is willing to
-dedicate as well as the final number of unique k-mers to be
-stored. The false positive rate is computed:  Formula to be inserted by JP (1)
-
- Figure 1 shows that the optimal number of hashing functions for
- ???Memory and ??? k-mers is ?? number of tables. Since the optimal
- number of hashing functions depends on the number of k-mers and the
- memory restrictions of the used hardware the optimal number of
- hashing functions has to be computed at run time.  This shows that
- there is a cirtical relation between memory and false positve
- rate. We measured the false positive rate for a specific dataset (???
- nr of k-mers) while increasing the dedicated memory. Figure 2 shows
- that the false positive rate improves exponentially with a linear
- increase in memory usage, while current assemblers require a linear
- increase of memory to accomodate a linear increase in the number of
- k-mers.
-
-Percolation Properties
-
-The application of this data structure is to store de Bruijn graphs,
-so we investigate what impact false positive k-mers have on this
-graph. Generally when considering two contigs to be stored in this
-data structure the likely hood that both contigs are erroneously
-connected appears to be very low. Never the less it is known that
-Bloom filters should have a low number of entries to keep them
-accurate (estimated 50\% bins filled), the question remains at what
-threshold of false positives k-mers are erroneously
-connected. Percolation theory predicts a threshold of entered data
-points where suddenly most points are within the largest connected
-component. When randomly adding more and more k-mers to the data
-structure we can compute the size of the largest connected
-component. We find the percolation threshold for de Bruijn graphs
-using a false positive rate of 0.0 to be ~0.21 (see Figure 3). This
-suggest that one has to choose k in such a way that the final number
-of existing k-mers is not exceeding 21\% of $4^k$ otherwise the data
-would all be connected already by chance. The disadvantage of using
-percolation theory to assess usability is limited in that it assumes
-random k-mers to be added, while actual sequence data is a stream of
-connected k-mers.
-
-Linear interpolation allows us to determine when ratio between max memory and actual memory (for different nr of hashing functions) should percolate.
-
-Application
-
-Figure 4 (rings of data displayed as graphs) illustrates how the phage M13 displayed as a de Bruijn graph (k=31) would look like when stored using a Bloom filter. It becomes apparent that using less memory causing a higher false positive rate deteriorates the picture but leaves the overall structure intact.
-
-
 \section{Results}
 
 \subsection{Using Bloom filters to store k-mers.}
+
+%% Message: We can store de bruijn graphs in Bloom filters which gives us a fast and lightweight way to represent them.
+
+\begin{figure}
+\center{\includegraphics[width=5in]{figures/f1}}
+\caption{Bloom filter.}
+\end{figure}
 
 We use a variation of the Bloom filter data structure to store k-mers
 in memory. Rather than using multiple hash functions but only a single
@@ -218,21 +145,22 @@ reasonable period of time. Thus, if the false positive rate is too
 high, graph traversal using a search algorithm such as breadth-first
 search is infeasible.
 
-\subsection{Graph partitioning.}
-If graph traversal is indeed feasible, it is possible to find all of
-the connected components in a graph. However, this is a challenging
-issue for k-mer graphs because the data structures used in simple
-breadth-first search and depth-first search algorithms may not be able
-to hold the required amount of data to explore the entire search space
-because there can be billions of vertices in a single component. To
-handle this, we keep the search local by tagging at least one k-mer in
-each read using a C++ map data structure from the tagged k-mer to the
-ID of the read. Then, we explore the k-mer graph starting at the
-k-mers in each read and use a limited breadth-first search where we
-stop at any tagged k-mer or when the BFS-tree has become too
-large. When the underlying reads in each connected component are
-discovered, they can be separated and assembled individually to
-greatly save memory requirements.
+\subsection{Effect of false positives on local graph structure}
+
+%% This representation has a one-sided error that we can measure and
+%% predict in terms of its impact on graph properties.  Link degradation
+%% to percolation here.
+
+\begin{figure}
+\center{\includegraphics[width=5in]{figures/f2b}}
+\caption{Bloom filters scale well.}
+\end{figure}
+
+\begin{figure}
+\center{\includegraphics[width=5in]{figures/optht}}
+\caption{There is a minimum false positive rate for a given amount of memory
+and amount of data, set by the number of hash tables.}
+\end{figure}
 
 \subsection{Percolation theory in k-mer graphs.}
 As the false positive rate increases, there appears to be a sudden
@@ -280,33 +208,6 @@ various graph invariants between the Illumina dataset, an exact
 representation of the genome, and various inexact representations with
 different false positive rates.
 
-\subsection{Storing de Bruijn graphs in Bloom filters}
-
-We can store de bruijn graphs in Bloom filters which gives us a fast and lightweight way to represent them.
-
-\begin{figure}
-\center{\includegraphics[width=5in]{figures/f1}}
-\caption{Bloom filter.}
-\end{figure}
-
-\subsection{Effect of false positives}
-
-This representation has a one-sided error that we can measure and
-predict in terms of its impact on graph properties.  Link degradation
-to percolation here.
-
-\begin{figure}
-\center{\includegraphics[width=5in]{figures/f2b}}
-\caption{Bloom filters scale well.}
-\end{figure}
-
-\begin{figure}
-\center{\includegraphics[width=5in]{figures/optht}}
-\caption{There is a minimum false positive rate for a given amount of memory
-and amount of data, set by the number of hash tables.}
-\end{figure}
-
-
 \begin{figure}
 \center{\includegraphics[width=5in]{percolation_K5_to_K12_withLegend}}
 
@@ -342,11 +243,9 @@ This figure shows
 
 \end{figure}
 
-\subsection{This can usefully be applied to assembly graphs}
+%% \subsection{This can usefully be applied to assembly graphs}
 
-We can use this to look at local assembly graphs usefully.
-
-\paragraph{Fidelity of local graph properties is tunable.}
+%% We can use this to look at local assembly graphs usefully.
 
 \begin{figure}
 \center{\includegraphics[width=5in]{k31}}
@@ -354,8 +253,6 @@ We can use this to look at local assembly graphs usefully.
     exponential?  Or what?  Might be too sharp for that, but what
     would the functional form be? Can we fit?  Do we know the constants?}}
 \end{figure}
-
-\paragraph{Large scale graph structure is retained even with high FP rate, out to percolation threshold.}
 
 \begin{figure}
 \includegraphics[width=3in]{figures/f3b001}
@@ -366,25 +263,12 @@ We can use this to look at local assembly graphs usefully.
 {\bf CTB: This should be out first figure, I think!}}
 \end{figure}
 
-
-
-\paragraph{Both local and large scale graph structure fidelity is preserved for relatively low memory representations.}
-
-\paragraph{We can partition exact data and inexact (error-prone) data.}
-
 \begin{figure}
 \center{\includegraphics[width=5in]{figures/f3d}}
 \caption{Computation required to partition graphs grows with false positive
 rate.  CTB: good to know, but I think this figure can go away; it's implied
 by everything else.}
 \end{figure}
-
-\paragraph{Link error-prone sequencing to percolation threshold?  Error inflates number of unique k-mers being added in => increases memory requirements.}
-
-Can we discuss sequencing errors for PacBio and link to percolation (show
-that even reasonably high sequencing error rate would not percolate?)
-
-100x coverage issue.
 
 \begin{figure}
 \center{\includegraphics[width=5in]{contigEnvironment}}
@@ -403,17 +287,6 @@ ecoli genome. k = ??}
 \caption{The difference between exact and inexact kmer storage for the
 yeast genome. k = ??}
 \end{figure}
-
-Idea for last graph:
-
-We would do an exact representation of the E.coli genome, an exact 
-representation of an Illumina dataset for E.coli, and then inexact
-representations for each with different false positive rates (1\% and
-10\%). We can then compare the exact genome versus other types to see
-how the number of unique kmers, the number of duplicate kmers, and the
-average neighbors per vertex changes. Ultimately, we would be able to
-argue that the number of erroneous k-mers created by Illumina
-sequencing eclipses that of what is created using our approach.
 
 \section{Discussion}
 
@@ -515,8 +388,128 @@ Also address integration of longer reads, perhaps in the introduction
 
 Jim Cole and Jordan Fish.  Qingpeng.  Adina.
 
-%% do we want to explore for larger S?  Does false positive rate change?
+\section{Leftovers}
+
+Probabilistic de Bruijn Graph Data Structure
+
+The pupose of the data structure is to efficiently storethe presens of
+k-mers in the de Bruijn graph. One extreme way of storing that data is
+to allocate a bin for each possible k-mer requiring $4^k$ bits which
+gives contant lookup time but is infeasable for large enough k
+(typically k 20-50). The other extreme would use a bin for each
+existing k-mer minimizing the memory requirements but requires linear
+lookup time. Trees or similar structures generally have constant time
+access but their memory is k dependent. All above methods are acurate
+in the sense that a query to the data structure results in a
+definitive answer about the existence of a k-mer.  In contrast to this
+we use a Bloom filter to store k-mers. When a k-mer is added to the
+memory a hashing function is used to map this k-mer into a memory
+space that is smaller then the possible number of k-mers. This hashing
+function possibly adds different k-mers into the same memory bin. At
+the same time, when querying the Bloom filter for a specific k-mer it
+might return a positive answer even though that specific k-mer wasn’t
+present but another one “accidentally” maped into the same bin,
+resulting in a false positve but no false negative rate. This rate can
+be reduced further by using multiple hash tables each with a different
+hashing function. Therefor a Bloom fiter can be understood as an
+oracle that can make difinitive “no” answers but only a “maybe”
+instead of a definitive “yes”. Unfortunately the more entries the hash
+table contains the higher the false positive rate. The false positive
+rate for the bloom filter can be calculated by multiplying the hash
+table occupancy of each hash table together. Though Bloom
+filters have been used to solve Bioinformatics-related problems in the
+past\cite{pmid20426693, pmid20472541, haskell}, 
+we believe that this is the first attempt to use the data
+structure as a method of graph traversal.
+
+Conventionally Bloom filters utilize more then one hashing function to
+reduce the false positive rate, where these different hashing
+functions all write into a common memory space. Here instead each
+hashing function writes into its own space. The false positive rate
+depends on the maximum amount of memory the user is willing to
+dedicate as well as the final number of unique k-mers to be
+stored. The false positive rate is computed:  Formula to be inserted by JP (1)
+
+ Figure 1 shows that the optimal number of hashing functions for
+ ???Memory and ??? k-mers is ?? number of tables. Since the optimal
+ number of hashing functions depends on the number of k-mers and the
+ memory restrictions of the used hardware the optimal number of
+ hashing functions has to be computed at run time.  This shows that
+ there is a cirtical relation between memory and false positve
+ rate. We measured the false positive rate for a specific dataset (???
+ nr of k-mers) while increasing the dedicated memory. Figure 2 shows
+ that the false positive rate improves exponentially with a linear
+ increase in memory usage, while current assemblers require a linear
+ increase of memory to accomodate a linear increase in the number of
+ k-mers.
+
+Percolation Properties
+
+The application of this data structure is to store de Bruijn graphs,
+so we investigate what impact false positive k-mers have on this
+graph. Generally when considering two contigs to be stored in this
+data structure the likely hood that both contigs are erroneously
+connected appears to be very low. Never the less it is known that
+Bloom filters should have a low number of entries to keep them
+accurate (estimated 50\% bins filled), the question remains at what
+threshold of false positives k-mers are erroneously
+connected. Percolation theory predicts a threshold of entered data
+points where suddenly most points are within the largest connected
+component. When randomly adding more and more k-mers to the data
+structure we can compute the size of the largest connected
+component. We find the percolation threshold for de Bruijn graphs
+using a false positive rate of 0.0 to be ~0.21 (see Figure 3). This
+suggest that one has to choose k in such a way that the final number
+of existing k-mers is not exceeding 21\% of $4^k$ otherwise the data
+would all be connected already by chance. The disadvantage of using
+percolation theory to assess usability is limited in that it assumes
+random k-mers to be added, while actual sequence data is a stream of
+connected k-mers.
+
+Linear interpolation allows us to determine when ratio between max memory and actual memory (for different nr of hashing functions) should percolate.
+
+Application
+
+Figure 4 (rings of data displayed as graphs) illustrates how the phage M13 displayed as a de Bruijn graph (k=31) would look like when stored using a Bloom filter. It becomes apparent that using less memory causing a higher false positive rate deteriorates the picture but leaves the overall structure intact.
+
+\subsection{Graph partitioning.}
+If graph traversal is indeed feasible, it is possible to find all of
+the connected components in a graph. However, this is a challenging
+issue for k-mer graphs because the data structures used in simple
+breadth-first search and depth-first search algorithms may not be able
+to hold the required amount of data to explore the entire search space
+because there can be billions of vertices in a single component. To
+handle this, we keep the search local by tagging at least one k-mer in
+each read using a C++ map data structure from the tagged k-mer to the
+ID of the read. Then, we explore the k-mer graph starting at the
+k-mers in each read and use a limited breadth-first search where we
+stop at any tagged k-mer or when the BFS-tree has become too
+large. When the underlying reads in each connected component are
+discovered, they can be separated and assembled individually to
+greatly save memory requirements.
+
+\paragraph{We can partition exact data and inexact (error-prone) data.}
+
+\paragraph{Link error-prone sequencing to percolation threshold?  Error inflates number of unique k-mers being added in => increases memory requirements.}
+
+Can we discuss sequencing errors for PacBio and link to percolation (show
+that even reasonably high sequencing error rate would not percolate?)
+
+100x coverage issue.
+
+Idea for last graph:
+
+We would do an exact representation of the E.coli genome, an exact 
+representation of an Illumina dataset for E.coli, and then inexact
+representations for each with different false positive rates (1\% and
+10\%). We can then compare the exact genome versus other types to see
+how the number of unique kmers, the number of duplicate kmers, and the
+average neighbors per vertex changes. Ultimately, we would be able to
+argue that the number of erroneous k-mers created by Illumina
+sequencing eclipses that of what is created using our approach.
 
 \bibliographystyle{abbrv}
 \bibliography{kmer-percolation}
 \end{document}
+
+
