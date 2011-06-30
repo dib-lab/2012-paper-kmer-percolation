@@ -25,14 +25,14 @@ large assembly graphs.
 
 Within the past decade, the volume of sequence data being generated
 from next-generation sequencing platforms such as Illumina and 454
-(citation) has out paced the computational resources needed for
-analysis (citation). Current algorithms (citation) do not scale well
-enough to handle the expected exponential rise in sequence dataset
+(citation) has outpaced the computational resources needed for
+analysis (citation). Many current algorithms (citation) do not scale well
+enough to handle the current exponential rise in sequence dataset
 sizes. Additionally, recent sequencing efforts such as the human gut
 microbiome\cite{pmid20203603}, cow rumen\cite{pmid21273488}, and the 
-human genome\cite{pmid21187386} have required a
-supercomputer with 512GB of memory to construct their
-assemblies. Today, high memory requirement for sequence assembly is
+human genome\cite{pmid21187386} require large computers with 512GB of memory
+or more to construct their
+assemblies (@CTB continue re scaling). Today, high memory requirement for sequence assembly is
 among the biggest bottlenecks that we face in efficiently analyzing
 sequence data. To resolve this issue, we present a novel application
 of the Bloom filter data structure\cite{bloom} for storing and traversing de
@@ -44,24 +44,25 @@ reads into a consensus sequence based on overlaps and mate-pair
 information. Before the advent of next-gen platforms, Sanger
 sequencing was the method used for sequencing projects.  Sanger yields
 longer reads from a clonal population.  Though
-computers were not as fast or had as much memory, it was feasible to
+computers were not as fast or large, it was feasible to
 store all of the reads in memory and check for overlaps by performing
-an all-by-all comparison. With nextGen sequencing methods like 454 or
-Illumina, large datasets of short reads 
-are generated. The assembly of these reads requires different
-algorithms and also a much larger amount of memory. Using the overlap
+an all-by-all comparison (ref Celera, GoldenPath). With next-gen sequencing methods such as 454 and Illumina, much larger datasets of somewhat shorter reads 
+are generated (@CTB include numbers). The assembly of these reads requires different
+algorithms and also a much larger amount of memory.
+(@CTB rearrange -- ) Using the overlap
 graph, the assembler performs several multiple sequence alignments to
 find a consensus sequence. If paired-end information is available,
 some repetitive regions in the genome are resolved, and scaffolds
 between contiguous sequences are created. This class of assemblers are
 generally called “Overlap-Layout-Consensus.” Examples include
 Arachne[], Celera[], phrap[], and TIGR[]. Though effective, the OLC
-approach had drawbacks, and a new approach using de Bruijn graphs
-(DBG) was developed\cite{pmid11504945}, which had a more natural way
-of handling genomic content such as repetitive regions. In a de Bruijn
-graph approach, reads of length l are broken down into words of fixed
-size k. Assemblers now try to find an Euler path (citation) through
-this graph which represents an assembled contig. In most assemblers,
+approach scales with the number of reads, and as read numbers ballooned
+a new approach using de Bruijn graphs (DBG) was developed\cite{pmid11504945}.
+In a de Bruijn
+graph approach, reads of length $l$ are broken down into words of fixed
+size $k$, or k-mers, and overlaps are implicitly represented as runs of shared k-mers.
+De Bruijn graph assemblers then try to find an Euler path (citation) through
+this graph, which represents an assembled contig. (@CTB move/expand --) In most assemblers,
 k-mers are stored in a hash table that handles collisions[], a trie
 structure[], a suffix array[], or in other more exotic ways.
 
@@ -69,7 +70,7 @@ As next-generation sequencing platforms became prominent, the DBG approach
 became the preferred method for assembling these types of datasets
 because an all-by-all comparison of reads became infeasible. While DBG
 approaches are generally more memory-efficient than OLC approaches, it
-is clear that more efficient methods should be developed to handle the
+is clear that more efficient methods are needed to handle the
 increasing size of sequence datasets. This need is particularly
 prevalent in the area of metagenomics, especially for high diversity
 microbial communities.  (@CTB justify this based on memory scaling
@@ -80,13 +81,13 @@ represent the de Bruijn graph. We show that this method drastically
 conserves memory and that the drawbacks from using such a
 probabilistic (non accurate) method are negligible.  We also briefly
 discuss techniques for using the PDBG to study assembly graph structure
-and potentially improve assembly by graph decomposition etc.
+and potentially improve assembly by graph decomposition, repeat filtering, and
+other approaches.
 
-We have developed a software package named khmer, which we use for
-filtering of sequence data and for simulating properties of a
-probabilistic de Bruijn graph. It is written in C++ and Python and
-released under the BSD license. It is available at:
-https://github.com/ctb/khmer
+We have also developed a software package named khmer, which
+implements our probabilistic de Bruijn graph.  It is written in C++
+and Python and released under the BSD license. It is freely available
+at: https://github.com/ctb/khmer
 
 \section{Results}
 
@@ -145,6 +146,10 @@ reasonable period of time. Thus, if the false positive rate is too
 high, graph traversal using a search algorithm such as breadth-first
 search is infeasible.  (@CTB This deserves a better explanation, if
 the point is to prepare the reader for the percolation discussion.)
+
+Note that the primary data structure is constant in its memory usage,
+so only ancillary information (list of nodes already visited, or
+waypoints in the graph) consumes additional memory.
 
 \subsection{Effect of false positives on local graph structure}
 
@@ -289,7 +294,10 @@ rate of increase in global connectivity from false positives to a
 first-order phase transition, which lets us define a broad range of
 parameters for which global graph structure is extremely accurate.
 Within this range, the primary effect of decreasing memory is to increase
-traversal computation.
+traversal computation.  Note that this also provides a systematic way
+to trade time spent in traversal (computation) off against memory,
+with up to a 2-4 fold decrease in memory in exchange for XXX increase
+in computation (@CTB).
 
 The effect of increasing false positive rate as ``error'' can be
 compared to the effect of sequencing errors.  Sequencing error
