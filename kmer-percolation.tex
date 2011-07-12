@@ -25,14 +25,16 @@ large assembly graphs.
 
 Within the past decade, the volume of sequence data being generated
 from next-generation sequencing platforms such as Illumina and 454
-(citation) has outpaced the computational resources needed for
-analysis (citation). Many current algorithms (citation) do not scale well
+has outpaced the computational resources needed for
+analysis. Many current algorithms do not scale well
 enough to handle the current exponential rise in sequence dataset
 sizes. Additionally, recent sequencing efforts such as the human gut
 microbiome\cite{pmid20203603}, cow rumen\cite{pmid21273488}, and the 
 human genome\cite{pmid21187386} require large computers with 512GB of memory
 or more to construct their
-assemblies (@CTB continue re scaling). Today, high memory requirement for sequence assembly is
+assemblies. Sequencing companies continue to innovate to provide longer reads, fewer errors, 
+and deeper coverage. However, this further contributes to the difficulty in computational 
+analysis of the data. Today, high memory requirement for sequence assembly is
 among the biggest bottlenecks that we face in efficiently analyzing
 sequence data. To resolve this issue, we present a novel application
 of the Bloom filter data structure\cite{bloom} for storing and traversing de
@@ -47,7 +49,8 @@ longer reads from a clonal population.  Though
 computers were not as fast or large, it was feasible to
 store all of the reads in memory and check for overlaps by performing
 an all-by-all comparison (ref Celera, GoldenPath). With next-gen sequencing methods such as 454 and Illumina, much larger datasets of somewhat shorter reads 
-are generated (@CTB include numbers). The assembly of these reads requires different
+are generated. According to the Illumina website (cite...), up to 600 gigabases of sequence can be generated 
+in around 10 days with reads in excess of 100 bp. The assembly of these reads requires different
 algorithms and also a much larger amount of memory.
 (@CTB rearrange -- ) Using the overlap
 graph, the assembler performs several multiple sequence alignments to
@@ -73,8 +76,11 @@ approaches are generally more memory-efficient than OLC approaches, it
 is clear that more efficient methods are needed to handle the
 increasing size of sequence datasets. This need is particularly
 prevalent in the area of metagenomics, especially for high diversity
-microbial communities.  (@CTB justify this based on memory scaling
-with novely k-mers.)
+microbial communities. Due to the high number of microbial species 
+in environmental samples, it can be difficult to obtain high coverage for low abundant species. This 
+requires very deep coverage, which introduces novel k-mers from both errors and sequence that 
+would be difficult to obtain with lower coverage. Due to the enormous number of k-mers in the 
+environmental samples, the memory scaling issue needs to be addressed.
 
 Here we explore the use of a Bloom filter to probabilistically
 represent the de Bruijn graph. We show that this method drastically
@@ -203,8 +209,22 @@ together erroneously. We further note that when the false positive
 rate is above the percolation threshold, the resulting graph would be
 impossible to visualize for large values of k.
 
-@CTB would like graph of change in longest shortest path between all
-pairs of k-mers, to illustrate the global graph structure does not change.
+Furthermore, we demonstrate that the global connectivity of the graph is unlikely 
+to change below the percolation threhold. We randomly generated 131bp long circular 
+chromosomes and calculated the diameter at different false positive rates. The diameter 
+of a connected component in a graph is defined as the length of the ``longest shortest'' 
+path between any two vertices in the component. As Figure X shows, there is unlikely to 
+be erroneous connections between pairs of ``real'' k-mers in the graph below the 
+percolation threshold. In fact, if this were the case, one would expect the diameter 
+to decrease due to the creation of shorter paths between k-mers.
+
+\begin{figure}
+\center{\includegraphics[width=5in]{figures/diameter.png}}
+\caption{The diameter of randomly generated 131bp long circular chromosomes in 31-mer 
+space for different false positive rates.}
+\end{figure}
+
+
 
 \subsection{Sequencing errors eclipse errors from graph representation.} One
 important consideration when determining the usefulness of our k-mer
@@ -219,6 +239,28 @@ issue. We used an E. coli dataset provided by Illumina to compare
 various graph invariants between the Illumina dataset, an exact
 representation of the genome, and various inexact representations with
 different false positive rates.  (@CTB repeat with newer E. coli data.)
+
+For these estimates we use the genomic sequence from the E. coli strain 
+MG1665 NC 000913. Which has a circular genome with 4571407 nucleotides. 
+In theory each of the k-mers that makes this
+circular graph should have exactly one k-mer following it, but due to 
+repeats and identical k-mers we find 4572123 neighbors indicating that 
+there are 716 interconnections in this graph already when using an exact 
+representation. We repeat this procedure but instead of using an exact representation
+we use a bloom filter with 1000000000 bits of memory we find 
+4639731 total neighbors which is an excess of 67608 over the expected number 
+of neighbors, and all of these must necessarily be false positives generated 
+by the bloom filter. Still this is ~1.5\% of an error rate. For smaller memory sizes we find higher
+error rates 5216029 neighbors (for 100000000 bits ~14.0\% error) and using only 
+10000000 bits memory the graph structure deteriorates drastically and we 
+find 9597387 neighbors which is an error rate of ~109\%. Never the less, when using 
+sequencing data from Illumina (citation) with a 100fold coverage after quality filtering
+the reads. If w would use the 1000000000 Bits of memory from before, we would 
+fall above the percolation threshold which if about $2.39 \cdot 10^9$ for the 417159560 
+kMers present in the Illumina dataset, therefor we use 10000000000 Bits (10 fold more) 
+and still find 10653856 neighbors, which is a ~133\% error already using 10 times 
+more memory. Clearly demonstrating that
+the sequencing error dwarfs the error caused by the Bloom filter.
 
 \begin{figure}
 \center{\includegraphics[width=5in]{percolation_K5_to_K12_withLegend}}
@@ -236,7 +278,7 @@ $< \approx 0.0002$ (data not shown).}
 \center{\includegraphics[width=3in]{memoryFraction_vs_percolationThreshold}}
 \caption{The critical point for percolation is linearly related to the
   compression factor of the graph representation.  (@CTB Y axis should end at 0.)
-This figure shows
+{\bf The following data is wrong... }This figure shows
   the interpolated critical percolation threshold dependence on the
   memory used for the Bloom filter. $\rho$ is the fraction of
   maximally required memory ($4^{12}$ bits) for a de Bruijn graph with
@@ -440,30 +482,54 @@ stored. The false positive rate is computed:  Formula to be inserted by JP (1)
  increase of memory to accomodate a linear increase in the number of
  k-mers.  (@CTB qualify with increase in FP.)
 
-Percolation Properties
-
 The application of this data structure is to store de Bruijn graphs,
 so we investigate what impact false positive k-mers have on this
 graph. Generally when considering two contigs to be stored in this
 data structure the likely hood that both contigs are erroneously
 connected appears to be very low. Never the less it is known that
 Bloom filters should have a low number of entries to keep them
-accurate (optimal memory use is 50\% bins filled, but @CTB expand
-discussion), the question remains at what threshold of false positives
-k-mers are erroneously connected. Percolation theory predicts a
-threshold of entered data points where suddenly most points are within
-the largest connected component. When randomly adding more and more
-k-mers to the data structure we can compute the size of the largest
-connected component. We find the percolation threshold for de Bruijn
-graphs using a false positive rate of 0.0 to be ~0.21 (see Figure
-3). This suggest that one has to choose k in such a way that the final
-number of existing k-mers is not exceeding 21\% of $4^k$ otherwise the
-data would all be connected already by chance. The disadvantage of
-using percolation theory to assess usability is limited in that it
-assumes random k-mers to be added, while actual sequence data represents
-a connected path of overlapping k-mers.
+accurate (estimated 50\% bins filled), the question remains at what
+threshold of false positives k-mers are erroneously
+connected. Percolation theory predicts a threshold for randomly entered data
+points where this data suddenly starts to be connected in such a way that the majority 
+of added k-mers all aggregate in the largest connected component. This percolation
+threshold could be lower then the estimated 50\% filled bins, and also
+suggests the maximal possible load a hash table could handle before it's data
+starts percolating. 
+When randomly adding more and more k-mers to the data
+structure we can compute the size of the largest connected
+component. This allows us to sample the relative size of the largest connected component
+for every given p (probability that a k-mer is present) as well as the cluster size distribution.
+At the critical point this cluster size distribution must be scale free (citation). We use an F test
+to find at what value of p the resulting distribution in logarithmic scales can
+better be fitted linearly or quadratically:
+$F=(RSS1-RSS2/p2-p1)/(RSS2/n-p2)$
+to cope with the finite size sampling error the data is binned using the
+threshold binning method (citation).
+The critical value for percolation is indicated by F being maximal.
+We find the percolation threshold for de Bruijn graphs using a false 
+positive rate of 0.0 to be ~0.183 (see Figure 3). While at the same time
+the percolation appears to be the same for different k suggesting the 
+critical point to be k independent.
+This suggest that one can only add 18\% of the possible $4^k$ k-mers
+before random data would percolate anyways. Using percolation theory to 
+assess usability is limited in that it assumes
+random k-mers to be added, while actual sequence data is a stream of
+connected k-mers, fortunately this assumption results in a lower estimate and specific data
+could exceed the predicted 18\% limit.
 
-Linear interpolation allows us to determine when ratio between max memory and actual memory (for different nr of hashing functions) should percolate.
+The above results are valid for data structures that are accurate and have no false positive error,
+but the method presented here uses a hashing function and limited memory. Thus we have to investigate
+how limited memory affects the percolation threshold. It seams obvious that false positive nodes 
+basically increase the number of added k-mers, still it is not clear in which fashion this happens.
+Thus we find the percolation threshold for k=12 de Bruijn graphs using a single Bloom filter. We define
+$\rho$ to be the fraction of maximal needed memory for the filter. For various values of $\rho$ (0.1 0.2 0.4 0.6 0.8 1.0)
+we determine the critical point (see figure percolationThreshold vs rho) again using an F-test to find
+at which p the cluster size distribution is scale free. We find the critical point to be predictable
+by linear interpolation:
+$\theta = 1.743 \cdot 10^-1 * \rho + 3.249 \cdot 10^{-3}$ (RSS $8.59 \cdot 10^{-5}$, r=$9.976 \cdot 10^-1$)
+which allows us to predict how much memory one would need at most to store a particular number of k-mers
+so that the de Bruijn graph does not percolate by using probabilistic hashing.
 
 Application
 
