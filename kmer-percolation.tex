@@ -49,11 +49,12 @@ sequencing was the method used for sequencing projects.  Sanger yields
 longer reads from a clonal population.  Though
 computers were not as fast or large, it was feasible to
 store all of the reads in memory and check for overlaps by performing
-an all-by-all comparison\cite{assemblyreview} by constructing a graph 
-representing read overlaps. Using the overlap graph, the assembler 
+an all-by-all comparison by constructing a graph 
+representing read overlaps\cite{assemblyreview}. Using the 
+overlap graph, the assembler 
 performs several multiple sequence alignments to find a consensus sequence. 
 If paired-end information is available, some repetitive regions in the 
-genome are resolved, and scaffolds bewtween contigous sequences are 
+genome are resolved, and scaffolds between contigous sequences are 
 created. This class of assemblers are generalled called 
 ``Overlap-Layout-Consensus.'' Examples include
 Arachne\cite{arachne}, Celera\cite{celera}, Newbler\cite{newbler}, and 
