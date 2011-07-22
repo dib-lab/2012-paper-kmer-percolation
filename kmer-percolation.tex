@@ -158,8 +158,10 @@ it can be impossible to traverse given high enough K. For example, if
 K is set to 32, no modern computer can explore each k-mer in a
 reasonable period of time. Thus, if the false positive rate is too
 high, graph traversal using a search algorithm such as breadth-first
-search is infeasible.  (@CTB This deserves a better explanation, if
-the point is to prepare the reader for the percolation discussion.)
+search is infeasible. For instance, if a typical k-mer in the graph has 
+more than one erroneous neighbor, it is difficult to store all k-mers 
+that have been traversed. However, it is not immediately clear 
+at what false positive rate this occurs.
 
 Note that the primary data structure is constant in its memory usage,
 so only ancillary information (list of nodes already visited, or
@@ -187,8 +189,7 @@ what FP rate do we systematically buy ourselves trouble?
 As the false positive rate increases, there appears to be a sudden
 transition between the point where graph traversal is possible and
 when it is not. This rapid change resembles a phase transition in the
-field of physics, which ultimately relates to percolation theory (@CTB
-isn't this the other way around? percolation to phase transition?). As
+field of physics, which can be modelled using percolation theory. As
 long as the false positive rate is below the percolation threshold (in
 the subcritical phase), it is possible to traverse the graph. If the
 false positive rate is above (in the supercritical phase), then graph
