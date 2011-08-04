@@ -55,7 +55,7 @@ overlap graph, the assembler
 performs several multiple sequence alignments to find a consensus sequence. 
 If paired-end information is available, some repetitive regions in the 
 genome are resolved, and scaffolds between contigous sequences are 
-created. This class of assemblers are generalled called 
+created. This class of assemblers are generally called 
 ``Overlap-Layout-Consensus.'' Examples include
 Arachne\cite{arachne}, Celera\cite{celera}, Newbler\cite{newbler}, and 
 PCAP\cite{pcap}. With next-gen sequencing 
@@ -68,8 +68,8 @@ algorithms and also a much larger amount of memory. Since the OLC
 approach scales with the number of reads, a new approach using de Bruijn 
 graphs (DBG) was developed\cite{pmid11504945}.
 In a de Bruijn
-graph approach, reads of length $l$ are broken down into words of fixed
-size $k$, or k-mers, and overlaps are implicitly represented as runs of shared k-mers.
+graph approach, reads are broken down along a sliding window into words of fixed
+size $k$, or k-mers, and overlaps are implicitly represented as shared k-mers.
 De Bruijn graph assemblers then try to find an Euler path through
 this graph, which represents an assembled contig\cite{assemblyreview}. 
 
@@ -133,8 +133,8 @@ filter. Thus, we can determine the overall false positive rate by
 multiplying the occupancy for each hash table. Another advantage to
 using a Bloom filter is that a linear increase in the amount of memory
 used creates an exponential improvement in the false positive
-rate. For example, ~4.78 bits per k-mer are needed for a false
-positive rate of 10\% while ~6.22 bits per k-mer are need for a false
+rate. For example, \textasciitilde4.78 bits per k-mer are needed for a false
+positive rate of 10\% while \textasciitilde6.22 bits per k-mer are need for a false
 positive rate of
 5\%. As with other hash-style data structures, Bloom filters have a
 fast lookup time, which is O(h) when there are h hash tables to query
