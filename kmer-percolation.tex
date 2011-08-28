@@ -37,7 +37,10 @@ sizes. Additionally, recent sequencing efforts such as the human gut
 microbiome\cite{pmid20203603}, cow rumen\cite{pmid21273488}, and the 
 human genome\cite{pmid21187386} require large computers with 512GB of memory
 or more to construct their
-assemblies. Sequencing companies continue to innovate in developing new 
+assemblies. 
+% @CTB Two separate arguments: we need big memory NOW.  And, we need to
+% scale in the future because sequencing companies are improving.
+Sequencing companies continue to innovate in developing new 
 methods to produce longer reads, fewer errors, 
 and deeper coverage. However, this further contributes to the difficulty in computational 
 analysis of the data. Today, high memory requirement for sequence assembly is
@@ -46,15 +49,19 @@ sequence data. To resolve this issue, we present a novel application
 of the Bloom filter data structure\cite{bloom} for storing and traversing de
 Bruijn graphs in memory, which significantly reduces this
 memory bottleneck problem.
+% @CTB phrasing: instead of significantly reduces, maybe ``addresses''?
+% Tough statement.  Reduces memory requirements for some operations?
 
 The goal of de novo assembly is to assemble individual disconnected
 reads into a consensus sequence based on overlaps and mate-pair
 information. Before the advent of next-gen platforms, Sanger
-sequencing was the method used for sequencing projects.  Though
+sequencing was the primary method used for sequencing.  Though
 computers were slower and had less memory, it was feasible to
 store all of the reads in memory and check for overlaps by performing
 an all-by-all comparison by constructing a graph 
-representing read overlaps\cite{assemblyreview}. Using the 
+representing read overlaps\cite{assemblyreview}.
+\marginpar{@CTB is it true that this was feasible?}
+Using the 
 overlap graph, the assembler 
 performs several multiple sequence alignments to find a consensus sequence. 
 If paired-end information is available, some repetitive regions in the 
@@ -62,11 +69,11 @@ genome are resolved, and scaffolds between contigous sequences are
 created. This class of assemblers is generally called 
 ``Overlap-Layout-Consensus.'' Examples include
 Arachne\cite{arachne}, Celera\cite{celera}, Newbler\cite{newbler}, and 
-PCAP\cite{pcap}. With next-gen sequencing 
-methods such as 454 and Illumina, much larger datasets of shorter reads 
-are generated. With the Illumina Hi-Seq 2000 platform, up to 600 
+PCAP\cite{pcap}. However, with next-gen sequencing 
+platforms such as 454 and Illumina, much larger datasets of shorter reads 
+are generated. With the Illumina Hi-Seq 2000 platform, up to 200 
 gigabases of sequence can be generated 
-in around 10 days with reads in excess of 100 bp. The assembly of 
+in around 7 days with reads in excess of 100 bp. The assembly of 
 these reads requires different
 algorithms and also a much larger amount of memory. Originally developed to 
 handle repeat structures in Sanger datasets, a new approach using de Bruijn 
@@ -74,31 +81,41 @@ graphs (DBG) was developed\cite{pmid11504945}, which scales with the number
 of ``k-mers'' as opposed to reads.
 In a de Bruijn
 graph approach, reads are broken down along a sliding window into words of fixed
-size $k$, or k-mers, and overlaps are implicitly represented as shared k-mers.
+size $k$, or k-mers, and overlaps are implicitly represented as shared (k-1)-mers.
 De Bruijn graph assemblers then try to find an Euler path through
-this graph, which represents an assembled contig\cite{assemblyreview}.
+this graph, which is then output as an assembled contig\cite{assemblyreview}.
 
 As next-generation sequencing platforms became prominent, the DBG approach
 became the preferred method for assembling these types of datasets
 because an all-by-all comparison of reads is infeasible in situations where 
 computational resources are limited and/or dataset sizes are massive. While DBG
-approaches are generally more memory-efficient than OLC approaches, it
+approaches are generally more memory-efficient than OLC approaches,
+they do not scale.  It
 is clear that more efficient methods are needed to handle the
-increasing size of sequence datasets. This need is particularly
-prevalent in the area of metagenomics, especially for high diversity
+increasing size of sequence datasets. This need is
+prevalent in the area of metagenomics, and is especially
+needed for high diversity
 microbial communities. Due to the high number of microbial species 
 in environmental samples, it is generally difficult to obtain high coverage 
 for low abundant species. This 
 requires very deep coverage, which introduces novel k-mers from both 
 errors and sequence that 
 would be difficult to obtain with lower coverage. Due to the enormous 
-number of k-mers in the 
+diversity present in many
 environmental samples, the memory scaling issue must be addressed.
+\marginpar{@CTB Do we want to jump straight to metag?  True for mRNAseq, too;
+see my grant text.}
 
+\marginpar{@CTB Driven by the need to scale ... see grant text :).}
 Here we explore the use of a Bloom filter variant to probabilistically
 represent the de Bruijn graph. We show that this method drastically
+\marginpar{@CTB drastically conserves is a bit ugly.  Dramatically reduces?
+Do we have this comparison down?}
 conserves memory and that the drawbacks from using such a method 
 with false positives are negligible. Furthermore, we link the degradation 
+\marginpar{@CTB Show that our approach performs well?  We should reword to
+use ``compressible graph representation'' in the title and throughout the
+text, maybe, too.}
 of our approach for a high enough false positive rate to percolation 
 theory and estimate the percolation threshold. We also briefly
 discuss techniques for using the probabilistic k-mer graph to study 
@@ -107,6 +124,8 @@ graph decomposition, repeat filtering, and other approaches.
 
 \section{Methods}
 
+% @CTB implementation details of ht (not language, but data struct.)
+
 \subsection{Calculating Data Structure Properties}
 Many properties of Bloom filters such as the optimal number of hash functions 
 and the false positive rate are simple to calculate. The properties 
@@ -114,6 +133,8 @@ of our Bloom filter variant, which
 uses a separate hash table for each hash function, is essentially the 
 same as a classical Bloom filter. To calculate the false positive rate, we 
 take the product of the occupancy or each hash table; that is,
+\marginpar{@CTB would suggest P\_f.  Also, eliminate \^ and just make occ(h)
+be on the main text line.}
 \begin{center}
 FPR = $\prod_{h \in H}^{occ(h)}$
 \end{center}
@@ -121,6 +142,8 @@ where $h$ is a hash table in the set of hash tables $H$, and $occ$ denotes
 the occupancy (proportion of bits set) for a hash table.
 
 \subsection{Percolation Threhold Estimation}
+\marginpar{@CTB To calculate the rate at which aberrant connectivity is
+generated... avoid use of percolation until results.}
 To calculate the percolation threshold, we randomly add k-mers to the data structure 
 and continually calculate the false positive rate and size of the largest connected 
 component. This allows us to sample the relative size of the largest component for every 
@@ -132,6 +155,7 @@ scale can be better fitted in a linear or quadratic fashion using
 the F-value
 \newline
 \newline
+\marginpar{make equations look prettier and more readable!}
 \begin{center}
 $F=\frac{\frac{RSS_1-RSS_2}{p_2-p_1}}{\frac{RSS_2}{n-p_2}}$.
 \end{center}
@@ -151,11 +175,13 @@ at: https://github.com/ctb/khmer.
 
 \subsection{Using Bloom Filters To Store K-mers}
 We use a variation of the Bloom filter data structure to store k-mers
-in memory. Rather than using multiple hash functions but only a single
+in memory. Rather than using multiple hash functions with a single
 hash table, we use a different hash table for each hash
 function. Given a k-mer of interest, each table is queried for the
 presence of a k-mer until the k-mer cannot be found in a hash
-table. If each hash table contains the k-mer, then the k-mer may
+table.
+\marginpar{@CTB Ugly text! Make it sound better! (I don't know how...)}
+ If each hash table contains the k-mer, then the k-mer may
 be in the dataset. If any of the hash tables do not contain the
 k-mer, then the data set definitely does not contain it. That is, there is a one-sided
 error with false positives, but no false negatives. The many
@@ -163,6 +189,10 @@ calculable properties such as optimal number of hash functions that
 can be determined for Bloom filters apply to our variation as well. To
 demonstrate this, we stored 10,000 randomly generated 32-mers in our
 data structure for a fixed amount of memory (50,000 bits). As we
+\marginpar{@CTB I don't like 'computational demonstrations' unless we simply
+cannot calculate it analytically.  Perhaps ``it is straightforward to show...''
+and then dump it in supplemental material, along with a computational
+demonstration that shows that our code does the same thing.}
 varied the number of hash tables, we calculate the false positive
 rate. We show in Figure 1 that the optimal number of hash
 functions/tables is the same as the formula for a standard Bloom
@@ -177,7 +207,9 @@ positive rate of
 fast lookup time, which is $O(h)$ when there are $h$ hash tables to query
 for k-mer presence. Note that Bloom filters have been used in similar 
 ways for other Bioinformatics applications in the 
-past\cite{pmid20472541, haskell, pmid20426693}. 
+past\cite{pmid20472541, haskell, pmid20426693}.
+\marginpar{@CTB This will need to be expanded and moved to the introduction, note;
+that's where previous results/citations go.}
 
 \begin{figure}
 \center{\includegraphics[width=5in]{figures/optht}}
@@ -200,6 +232,8 @@ overlap. Some k-mers can have less than adjacent k-mers: an alternating k-mer
 having the same base (e.g. AAAAA...) has six. Our graph representation is 
 constant in its memory usage, so only ancillary information such as list of 
 nodes visited or waypoints in the graph consume addition memory. 
+\marginpar{@CTB Steal ``awesome things about this approach'' from grant text,
+and discussion section.  Constant memory, works for any k, fast, etc.}
 
 In contrast to an exact
 approach, there is a chance that a k-mer will be adjacent to a k-mer
@@ -214,6 +248,11 @@ more than one erroneous neighbor, it is difficult to store all k-mers
 that have been traversed given that the number of k-mers is proportional 
 to $4^k$. However, it is not immediately clear 
 at what false positive rate this occurs without simulation.
+\marginpar{@CTB This is a good engineering argument, but a terrible
+scientific one!  Refocus on introduction of false connectivity rather
+than on practicality of traversal.  Also, should note that it is INTUITIVELY
+obvious what the false positive rate for horrible false connectivity
+is (roughly 1/8th).}
 
 \subsection{Effect Of False Positives on Local Graph Structure}
 To see how erroneous neighbors created by false positives can alter 
@@ -223,7 +262,9 @@ the end to create a circular chromosome with 1,000 31-mers. Then,
 using four different false positive rates (fpr=0.01, 0.05, 0.10, and
 0.15), we explored the graph using breadth-first search beginning at
 the first 31-mer. We then used the graph
-layout package graphviz for visualization. The graphs in Figure 
+layout package graphviz for visualization.
+% @CTB move this to Methods.
+The graphs in Figure 
 2 demonstrate how
 the local graph structure begins to change while the original circular
 graph remains intact with no erroneous paths between k-mers that are
@@ -233,6 +274,8 @@ the percolation threshold is still unlikely to connect components
 together erroneously. We also note that when the false positive
 rate is above the percolation threshold, the resulting graph would be
 impossible to visualize for large values of k.
+% @CTB ``sufficiently high'' rather than ``above the perc threshold''.
+% percolation first mentioned in next sentence.
 
 \begin{figure}
 \includegraphics[width=3in]{figures/f3b001}
@@ -252,7 +295,7 @@ when it is not. This rapid change resembles a phase transition in the
 field of physics, which can be modelled using percolation theory. As
 long as the false positive rate is below the percolation threshold (in
 the subcritical phase), it is possible to traverse the graph. If the
-false positive rate is above (in the supercritical phase), then graph
+false positive rate is at or above this (in the supercritical phase), then graph
 traversal is infeasible. 
 
 We explored the percolation threshold by randomly inserting 31-mers into Bloom
@@ -264,11 +307,14 @@ graph also suggests that up to the percolation threshold, graph
 partitioning (finding all of the connected component in the graph) 
 is possible but becomes slower as the threshold is
 approached.
+\marginpar{@CTB Expand discussion of graph partitioning, maybe?  Introduce better? Or do we even want it?}
 
 \begin{figure}
 \center{\includegraphics[width=5in]{k31}}
 \caption{The average cluster size drastically increases as the false positive 
-rate approaches the percolation threshold.}
+rate approaches the percolation threshold.
+% @CTB perhaps ``sharply''?
+}
 \end{figure}
 
 Using the calculation method described in \emph{Methods} we found the 
@@ -291,6 +337,8 @@ path between any two vertices in the component. As Figure 4 shows, there is unli
 be erroneous connections between pairs of ``real'' k-mers in the graph below the 
 percolation threshold. In fact, if this were the case, one would expect the diameter 
 to decrease due to the creation of shorter paths between k-mers.
+% @CTB wrong, fix :).  Also, ``there is unlikely to be'' sounds like a German
+% wrote it.  Fix to English :)
 
 \begin{figure}
 \center{\includegraphics[width=5in]{figures/diameter.png}}
@@ -306,6 +354,7 @@ assemblers, sequencing errors add to the graph complexity and make it
 more difficult to find high-quality paths for generating long,
 accurate contigs. Since our approach generates
 a different type of error, we aim to show that for a reasonable false
+% @CTB ``aim to show'', blech.  ``We wanted to ascertain at what...''?
 positive rate, sequencing errors dominate the graph complexity
 issue. We used an E. coli dataset provided by Illumina to compare
 various graph invariants between the Illumina dataset, an exact
@@ -314,9 +363,12 @@ different false positive rates.
 
 For these estimates, we used the genomic sequence from the E. coli strain 
 MG1665 NC000913, which has a circular genome with $\sim 4.57 \cdot 10^6$ bases. 
+% @CTB you can use \times  here, too.  I would suggest 4.57e6 notation?
 In theory, each of the k-mers that makes this
 circular graph should have exactly one k-mer following it, but due to 
 repeats and identical k-mers we found 716 interconnections in this graph 
+% @CTB what's the difference between repeats and identical k-mers, again?
+% maybe just ``repeated k-mers''?
 already when using an exact representation. We repeated this procedure 
 using a single hash table with $10^9$ bits of memory and found an excess of 
 $67,608$ neighbors over the expected number, which corresponds to an error rate of 
@@ -332,6 +384,7 @@ $4.17 \cdot 10^8$ k-mers present in the Illumina dataset.
 If we use $10^{10}$ bits (10-fold more), we find a $\sim 133\%$ 
 error rate already. This clearly demonstrates that
 the errors generated from sequencing dwarfs the error caused by false positives.
+% @CTB I feel like the German is encroaching here, as well.  ``we find a ... already''
 
 \section{Discussion}
 
@@ -339,6 +392,7 @@ the errors generated from sequencing dwarfs the error caused by false positives.
 The compressible graph representation we have built on a Bloom filter
 is an efficient way to store and traverse k-mer graphs.  Per k-mer
 memory usage is low, and independent of k, while k-mer node lookup and
+% @CTB what does ``is low'' mean?  look at Jellyfish or tallymer?
 local traversal are constant time.  The primary data structure can
 also be implemented in constant memory.  This graph representation is
 also extremely simple to implement and verify.
@@ -349,11 +403,13 @@ connectivity are very predictable.  On a larger scale, we can link the
 rate of increase in global connectivity from false positives to a
 first-order phase transition, which lets us define a broad range of
 parameters for which global graph structure is extremely accurate.
+% @CTB Yes yes yes!
 Within this range, the primary effect of decreasing memory is to increase
 traversal computation.  Note that this also provides a systematic way
 to trade time spent in traversal (computation) off against memory,
 with up to a 2-4 fold decrease in memory in exchange for XXX increase
 in computation (@CTB).
+% @CTB well, what do you think I meant here?  Expand or come ask.
 
 The effect of increasing false positive rate as ``error'' can be
 compared to the effect of sequencing errors.  Sequencing error
@@ -365,17 +421,22 @@ elaborate graph structures.  In contrast, the Bloom graph error is
 entirely one-sided, only resulting in false positives; moreover, these
 false positives are uncorrelated to the ``true'' k-mers from which
 they arise, and do not generally contribute to local graph structure.
+% @CTB actually, they DO contribute to the local graph structure.  Why 
+% would I say this!? hmm.  Come ask.
 
 Overall, the Bloom k-mer graph is an efficient data structure for
 storing and traversing large k-mer graphs.
 
 \subsection{Using Bloom K-mer Graphs For DNA Sequence Assembly}
+% @CTB Applying instead of Using?
 Bloom k-mer graphs will not be directly useful for traditional
 approaches to DNA assembly, which rely on systematic heuristic
 transformations of graph structure to find an optimal path through the
 graph.  This is because the Bloom graph, as presented here, is limited
 to representing k-mer graphs for a fixed k, and paths cannot readily
 be compacted or eliminated.
+% @CTB What did I mean ``for a fixed k''?  I don't know of any DBG
+% reps that don't use a fixed k!
 
 There are many uses, however, for an extremely scalable
 constant-memory graph representation.  Below we discuss the use of the
@@ -384,10 +445,12 @@ properties and filtering data sets.
 
 For low-coverage samples, assembly graphs may contain many small
 unconnected components, that represent unconnected sequences.
+% @CTB why?  Beacuse of low coverage! Reiterate I guess.
 Sequences contributing to these unconnected components can be safely
 eliminated from the originating data sets without affecting the final
 assembly.  This can be done efficiently with a simple limited depth
 graph search algorithm.
+% @CTB this last sentence is bad.  Discuss effect of FP on this approach.
 
 More generally, assembly graphs may contain many disconnected
 subgraphs, due to the structure of the source data (e.g. transcriptome
@@ -395,6 +458,7 @@ or population sequencing) or because of low coverage.  These subgraphs
 can safely be partitioned into different graphs without affecting the
 final assembly, reducing the memory and computation required for
 assembly of the whole to that required for the largest subgraph.
+% @CTB discuss local vs global structure changes from FP on this.
 
 The Bloom k-mer graph can also be used to do de novo repeat discovery
 in collections of unassembled reads.  This in turn can be applied to
