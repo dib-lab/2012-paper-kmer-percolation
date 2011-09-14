@@ -197,6 +197,7 @@ k-mer used in the data structure is
 \begin{displaymath}
 \frac{m}{n} = \frac{1}{\ln(2)} \log{\frac{1}{P_f}}.
 \end{displaymath}
+% @JAP re: references for this section
 % this math is pretty straightforward to derive, but I have found a 
 % paper called Summary Cache: A Scalable Wide-Area Web Cache 
 % Sharing Protocol that does the relevant math if we want to use it
@@ -336,15 +337,19 @@ We wanted to know if the global connectivity of the graph is unlikely
 to change below the percolation threhold. 
 The diameter of a connected component in a graph is a measure of 
 the length of the ``longest shortest'' 
-path between any two vertices in the component (ref?).
+path between any two vertices\cite{bondy2008graph}.
 In our case, we only considered paths between two real k-mers
-in the dataset. 
-We randomly generated 58bp long circular
+in the dataset for the only component that contains real k-mers. 
+We randomly generated 50bp long circular
 chromosomes to construct components containing 50 k-mers and 
 calculated the diameter at different false positive rates, averaging
 the results from multiple runs ($n=20$).
 \marginpar{k is 8 here?  and how tough would it be to do n=100?  and aren't
 there L-k+1 k-mers in an L-length sequence?}
+% I had to set k to be low because I wanted to go beyond the percolation
+% threshold, and I couldn't think of a straightforward way to handle it
+% for a high value of k...n=100 or whatever would be pretty easy...I just 
+% wanted to get the graph generated
 As Figure 3 shows, 
 erroneous connections between pairs of ``real'' k-mers are unlikely
 below the 
@@ -358,7 +363,7 @@ with no overlap is $k$ in length.\marginpar{Is this true?  I would not really ex
 
 \begin{figure}
 \center{\includegraphics[width=5in]{figures/diameter}}
-\caption{The length of the longest shortest path of randomly generated 58bp 
+\caption{The length of the longest shortest path of randomly generated 50bp 
 long circular chromosomes in 8-mer 
 space for different false positive rates. Only real (non-error) k-mers are
 considered for starting and ending points.  @CTB change FPR in figure title to ``false positive rate''; move the title into the caption.}
@@ -377,26 +382,41 @@ various graph invariants between the Illumina dataset, an exact
 representation of the genome, and various inexact representations with
 different false positive rates.
 
-For these estimates, we used the genomic sequence from the E. coli strain 
-MG1665 NC000913, which has a circular genome with $\sim 4.57e10^6$ bases. 
-Due to 
-repeated k-mers, we found 716 pre-existing non-linear interconnections in this graph 
-when using an exact representation. We repeated this procedure 
-using a single hash table with $10^9$ bits of memory and found an excess of 
-$67,608$ neighbors over the expected number, which corresponds to an error rate of 
-$\sim 1.5\%$. For smaller memory 
-sizes we found higher error rates (~14.0\% error for $10^8$ bits and 
-~109\% for $10^7$ bits).
-\marginpar{``corresponds to an error rate'' -- could you define error rate, here?  Also, I think we should represent vertex error rates as 'fp rate (bits/k-mer)' or some such.}
+\begin{figure}
+\begin{tabular}{ | c || c | c | c | c | c | }
+\hline
+ & No. K-mers & No. Additional & No. Missing & Deg $\ge 2$ & \% Real K-mers \\ \hline \hline
+\emph{E. coli} Exact & 4530123 & 0 & 0 & 50605 & 100 \\ \hline
+\emph{E. coli} 1 \% & 4814050 & 283927 & 0 & 313844 & 94.1 \\ \hline
+\emph{E. coli} 5 \% & 6349301 & 1819178 & 0 & 1339102 & 71.3 \\ \hline
+Reads Exact & 45566033 & 41036029 & 119 & 7700483 & 9.9 \\ \hline
+Reads 1 \% & 48237038 & 43707032 & 117 & 9771028 & 9.4 \\ \hline
+Reads 5 \% & 62094757 & 57564749 & 115 & 18116934 & 7.3 \\
+\hline
+\end{tabular}
+\caption{An exact \emph{E. coli} genome representation of 17-mers was compared with 
+two inexact ones as well as an exact and two inexact representations of an Illumina 
+\emph{E. coli} dataset.}
+\end{figure}
 
-Nevertheless, when using 
-the sequencing data from Illumina, if we use the $10^9$ bits of memory 
-from before, we would fall above the percolation threshold which is 
-about $2.39e10^9$ bits for the 
-$4.17e10^8$ k-mers present in the Illumina dataset. 
-If we use $10^{10}$ bits (10-fold more), the error rate is 
-$\sim 133\%$. This clearly demonstrates that
-the errors generated from sequencing dwarfs the error caused by false positives.
+For these estimates, we used an \emph{E. coli} genome and an Illumina 
+dataset of the same strain for the comparison using a $k$ value of 17. We found 
+that there were 50,605 17-mers in the exact representation that had greater than 
+2 degrees. As the false positive rate increased, the number of these 
+17-mers increased in the expected linear fashion as well as the number of 
+additional 17-mers. Furthermore, the number of 
+``real'' 17-mers, those that are not false positives, 
+comprise of the majority of the graph.
+
+On the other hand, when we compared an exact representation of an Illumina dataset, 
+only 9.9 \% of the k-mers in the graph truly exist in the dataset. Note 
+that we only counted false positive k-mers that are in the same component as 
+at least one real k-mer. Furthermore, the number of 17-mers with more than 
+2 neighbors is proportionally higher than for the exact representation of the 
+genome, which demonstrates that sequencing errors greatly add to the complexity 
+of the graph. Thus, we find that the errors demonstrated by 
+sequencers dwarf the errors caused by our inexact graph representation 
+below a reasonable false positive rate.
 
 \section{Discussion}
 
@@ -409,7 +429,6 @@ local traversal are constant time.  The primary data structure can
 also be implemented in constant memory.  This graph representation is
 also easy to implement correctly.
 \marginpar{Is local traversal really constant time?  What is local traversal, anyway?  (I'm aware I wrote that in the first place, yes ;)}
-% @JAP I'm not certain either, but maybe it should be removed/replaced?
 
 The probabilistic nature of the data structure is a significant
 concern, but the collision rate and resulting increase in false local
@@ -480,15 +499,14 @@ meta-idb/metavelvet, or the Trinity paper?}
 
 The Bloom k-mer graph can also be used to do de novo repeat discovery
 in collections of unassembled reads.  This in turn can be applied to
-filtering of repeats prior to assembly (ref Hydra), or for isolating
+filtering of repeats prior to assembly/cite{hydra}, or for isolating
 repeats from shallow or exploratory sequencing efforts.
-% @JAP I can't find the Hydra citation
-% @CTB Rokshar is a co-author; hydra genome.  suppl material.
 
 It may also be possible to adapt sequence structure (e.g. ORF),
 homology (BLAST), and domain search (HMMER) algorithms to search this
 graph structure instead of searching either unassembled reads or
-assemblies (Fish, Brown and Cole, pers communication).  Because assembly graphs implicitly collapse identical
+assemblies (Fish, Brown and Cole, pers communication).  Because 
+assembly graphs implicitly collapse identical
 sequences into a single path, this may be a more scalable approach to
 targetted-gene analysis for metagenomics than current approaches
 (which rely on searching individual reads that may be overlapping or identical).  Also note that, unlike
@@ -509,7 +527,7 @@ reads that belong to high-complexity regions, and extract them for
 later resolution with more targetted approaches, e.g. an OLC assembler.
 Alternatively, regions could be locally examined and extracted for
 assembly, and then passed to scaffolding toolkit like Bambus for 
-larger-scale connectivity (ref).
+larger-scale connectivity\cite{bambus}.
 
 \subsection{Dramatic Scaling}
 It is clear that sequencing capacity will continue to outpace Moore's 
