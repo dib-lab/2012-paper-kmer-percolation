@@ -38,8 +38,9 @@ difficult.  Given the required depth of sampling for transcriptome and
 metagenome sequencing, we need to (continue to) scale.  This must be
 done with improved approaches rather than hardware.
 
-de Bruijn graph assembly is one of the dominant approaches (ref panda,
-metahit, rumen, trinity).  It cannot meet the scaling challenges, which
+de Bruijn graph assembly is one of the dominant 
+approaches\cite{trinity, panda, pmid21273488, pmid20203603}. 
+It cannot meet the scaling challenges, which
 are: (1) errors and (2) repeats.  
 
 If we could analyze the overall graph structure, it would be possible
@@ -49,7 +50,7 @@ block to scaling is the memory required to hold the graph structure,
 this is a no go.
 
 We present a compressible representation for de Bruijn graphs based on
-Bloom filters, a probabilistic data structure for tracking set
+Bloom filters\cite{bloom}, a probabilistic data structure for tracking set
 membership.  With this representation we can systematically trade
 memory consumption for false positive edges and vertices in the graph.
 While local graph properties such as degree are directly affected by
@@ -71,7 +72,7 @@ demonstrate its use for efficiently partitioning simulated data and
 discuss other potential uses, which include repeat discovery,
 graph-based error correction, and graph search.
 
-Bloom filters\cite{bloom} have been used for 
+Bloom filters have been used for 
 Bioinformatics applications 
 in the past\cite{pmid20472541, haskell, pmid20426693} but not for graph 
 storage.
@@ -475,7 +476,7 @@ assembly.  However, these approaches do not address scaling.
 
 \subsection{Other Uses}
 
-There are many potential uses for a scalable de Bruijn graph representation. 
+There are many potential uses for a scalable de Bruijn graph representation.
 
 Small component elimination.
 
