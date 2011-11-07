@@ -35,49 +35,110 @@ large assembly graphs.
 
 \section{Introduction}
 
-de novo Assembly approaches are key in many areas of biology.  Scaling
-assembly to the current generation of sequencing technologies is
-difficult.  Given the required depth of sampling for transcriptome and
-metagenome sequencing, we need to (continue to) scale.  This must be
-done with improved approaches rather than hardware.
 
-de Bruijn graph assembly is one of the dominant 
-approaches\cite{trinity, panda, pmid21273488, pmid20203603}. 
-It cannot meet the scaling challenges, which
-are: (1) errors and (2) repeats.  
 
-If we could analyze the overall graph structure, it would be possible
-to develop approaches to scaling assembly by partitioning the graph or
-removing highly connected components.  However, since the current
-block to scaling is the memory required to hold the graph structure,
-this is a no go.
 
-We present a compressible representation for de Bruijn graphs based on
-Bloom filters\cite{bloom}, a probabilistic data structure for tracking set
-membership.  With this representation we can systematically trade
-memory consumption for false positive edges and vertices in the graph.
-While local graph properties such as degree are directly affected by
-this false positive rate, measures of *global* graph connectivity such
-as diameter do not change until the false positive rate reaches a
-critical threshold.  The behavior of the graph at the critical
-threshold resembles a geometric phase transition, suggesting that
-accurate long range graph connectivity is retained until this point.
-We can therefore use this compressible representation to efficiently
-analyze assembly graph structure.  Moreover, this graph representation
-possesses a number of useful properties, including constant memory
-usage that is independent of the word size $k$, easy calculation of
-optimal memory usage, and direct calculation of false positive rates.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{\em De novo} assembly approaches are key in many areas of biology,
+yet scaling assembly to the volume of data produced by the current
+generation of sequencing technologies is challenging.  Assembly of
+metagenomic and transcriptomic data is particularly challenging,
+because of the deep sequencing required to sample rare molecules.
+
+Reference-free approaches such as assembly must be used when
+evolutionarily close genome sequences are not available for mapping
+and scaffolding of shotgun sequencing data.  While advances in
+sequencing technology have made metagenome and transcriptome
+sequencing reasonably inexpensive, most biological organisms do not
+have suitable reference genomes.  Transcriptome and metagenome reads
+must therefore often be assembled before quantitative or functional
+analysis can be performed.  And even when reference genomes {\em
+  are} available, de novo transcriptome assembly has been shown to
+offer some advantages over reference-based approaches \cite{trinity}.
+
+De novo assembly algorithms use sequence overlaps from shotgun
+sequencing data to estimate the sequence of the source DNA molecule,
+which is then output in larger contiguous sequences, or contigs.  de
+Bruijn graph assembly is one such approach that uses fixed-length
+overlaps, or k-mers, to build a connectivity graph of sequencing
+reads, from which likely contigs are determined through heuristic
+transformations of the graph and subsequent traversal.  This k-mer
+graph approach is currently the predominant approach for dealing with
+short sequencing reads from 454 and Illumina sequencing technologies
+\cite{trinity, panda, pmid21273488, pmid20203603}.
+
+One substantial practical challenge to assembling large data sets with
+k-mer graphs is the extremely large amount of memory required to store
+the k-mer graph.  k-mer graph memory usage scales with the number of
+unique k-mers in the data set, and is affected by both the underlying
+diversity of the sample as well as the sequencing error rate.  Because
+errors grow with the total amount of sequencing done, the deep
+sequencing required for even relatively low-complexity samples such as
+mRNA can overwhelm assemblers; for metagenomic samples, which may
+contain millions of different species, the problem is even more
+overwhelming.  This has led to a variety of inexact data-reduction
+approaches to scaling assembly, including k-mer abundance filtering
+and error correction.
+
+Another approach to scaling metagenome and transcriptome assembly is
+to analyze the global structure of the assembly graph and find
+disconnected components representing individual species or gene loci.
+This would permit a ``divide and conquer'' approach, reducing the size
+of the problem to the size of the largest connected component.  While
+this partitioning approach has been used to improve the quality of
+both transcriptome and metagenome assemblies (trinity, metaidb,
+metavelvet), current approaches use an exact graph representation,
+which does not address scaling.
+
+We therefore present a compressible representation for de Bruijn
+graphs based on Bloom filters\cite{bloom}, a probabilistic data
+structure for tracking set membership.  With this representation we
+can systematically trade memory consumption for false positive edges
+and vertices in the graph.  While local graph properties such as
+degree are directly affected by this false positive rate, measures of
+{\em global} graph connectivity such as diameter do not change until
+the false positive rate reaches a critical threshold.  The behavior of
+the graph at the critical threshold resembles a geometric phase
+transition, suggesting that accurate long range graph connectivity is
+retained until this point.  We can therefore use this compressible
+representation to efficiently analyze assembly graph structure.
+Moreover, this graph representation possesses a number of useful
+properties, including constant memory usage that is independent of the
+word size $k$, easy calculation of optimal memory usage, and straightforward
+calculation of expected false positive rates.
 
 This compressible graph representation permits us to efficiently store
 and traverse large assembly graphs in memory, with an approximately
 18x improvement in scaling over Velvet for real sequencing data.  We
 demonstrate its use for efficiently partitioning simulated data and
 discuss other potential uses, which include repeat discovery,
-graph-based error correction, and graph search.
-
-Bloom filters have been used for 
-Bioinformatics applications 
-in the past\cite{pmid20472541, haskell, pmid20426693} but not for graph 
+graph-based error correction, and graph search.  Bloom filters have
+been used for Bioinformatics applications in the
+past\cite{pmid20472541, haskell, pmid20426693} but not for graph
 storage.
 
 \section{Methods}
