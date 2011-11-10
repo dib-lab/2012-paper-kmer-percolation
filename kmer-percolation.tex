@@ -110,7 +110,7 @@ and is independent of the value of $k$.
 \subsection{Calculating Data Structure Properties}
 The properties of our Bloom filter variant are essentially the
 same as a classical Bloom filter. For an example of how various 
-properties of Bloom filters can be derived, see \cite{fan2000summary}. 
+properties of Bloom filters can be derived, see \cite{bloomsurvey}. 
 To calculate the expected false positive 
 rate, we
 take the product of the occupancy of each hash table; that is,
@@ -133,10 +133,6 @@ tables is
 \begin{displaymath}
 \frac{m}{n} = \frac{1}{\ln(2)} \log{\frac{1}{P_f}}.
 \end{displaymath}
-% @JAP re: references for this section
-% this math is pretty straightforward to derive, but I have found a
-% paper called Summary Cache: A Scalable Wide-Area Web Cache
-% Sharing Protocol that does the relevant math if we want to use it
 
 \subsection{Using The Bloom Filter As A K-mer Graph}
 Having stored the k-mers in a Bloom filter, we can traverse
