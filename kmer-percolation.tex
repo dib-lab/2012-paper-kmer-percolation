@@ -213,7 +213,9 @@ F=\frac{RSS_1-RSS_2}{p_2-p_1} \times \frac{n - p_2}{RSS_2}
 \end{displaymath}
 % @CTB DEFINE RSS, p, n
 
-To handle the finite size sampling error, the data was binned using the 
+where $RSS_i$ is the residual sum of squares for model $i$, $p_i$ is 
+the number of parameters for model $i$, and $n$ is the number of data 
+points. To handle the finite size sampling error, the data was binned using the 
 threshold binning method \cite{adami2002critical}. The critical value for 
 when aberrant connectivity occurred was found by determining the local maxima 
 of the F-values.
@@ -254,8 +256,8 @@ beginning at the first 31-mer.  The graphs in Figure 1 demonstrate how
 the local graph structure elaborates with the false positive rate
 while the overall circular graph structure remains, with no erroneous
 shortcuts between k-mers that are present in the original
-sequence. Because the k-mer space is extremely large for large k, a
-relatively high false positive rate ($\sim$ 15\%) is still unlikely to
+sequence. Because long erroneous paths are unlikely to occur, a
+relatively high false positive rate ($\sim$ 15\%) is unlikely to
 connect components together erroneously. Note that when the false
 positive rate is sufficiently high, the resulting graph is
 (practically speaking) impossible to visualize due to the effect of
@@ -301,7 +303,7 @@ cluster, and it is no longer possible to distinguish between reads
 that do not overlap in the original dataset using the Bloom filter.
 
 \begin{figure}
-\center{\includegraphics[width=5in]{k31}}
+\center{\includegraphics[width=5in]{newclustersize}}
 \caption{Average cluster size versus false positive rate. The average 
 cluster size sharply increases as the false positive 
 rate approaches the percolation threshold.
@@ -361,10 +363,8 @@ As Figure 3 shows,
 erroneous connections between pairs of ``real'' k-mers are unlikely
 below the 
 percolation threshold. At or after the percolation threshold, spurious connections 
-between real k-mers are created, which lowers the diameter. For larger k, false connections 
-between k-mers are even more unlikely since the shortest path between two k-mers 
-with no overlap is $k$ in length {\bf I DON'T BELIEVE YOU}.  Thus, the larger scale graph structure is retained until $p=0.183$, as suggested by the cluster size analysis and percolation results.
-% @CTB I DON'T BELIEVE YOU :)
+between real k-mers are created, which lowers the diameter. 
+Thus, the larger scale graph structure is retained until $p=0.183$, as suggested by the cluster size analysis and percolation results.
 
 \begin{figure}
 \center{\includegraphics[width=5in]{figures/diameter}}
@@ -394,12 +394,12 @@ with different false positive rates.
 \begin{tabular}{ | c || c | c | c | c | c | }
 \hline
  & No. K-mers & No. Additional & No. Missing & Deg $\ge 2$ & \% Real K-mers \\ \hline \hline
-\emph{E. coli} 0 \% & 4530123 & 0 & 0 & 50605 & 100 \\ \hline
-\emph{E. coli} 1 \% & 4814050 & 283927 & 0 & 313844 & 94.1 \\ \hline
-\emph{E. coli} 5 \% & 6349301 & 1819178 & 0 & 1339102 & 71.3 \\ \hline
-Reads 0 \% & 45566033 & 41036029 & 119 & 7700483 & 9.9 \\ \hline
-Reads 1 \% & 48237038 & 43707032 & 117 & 9771028 & 9.4 \\ \hline
-Reads 5 \% & 62094757 & 57564749 & 115 & 18116934 & 7.3 \\
+\emph{E. coli} 0 \% & 4,530,123 & 0 & 0 & 50,605 & 100 \\ \hline
+\emph{E. coli} 1 \% & 4,814,050 & 283,927 & 0 & 313,844 & 94.1 \\ \hline
+\emph{E. coli} 5 \% & 6,349,301 & 1,819,178 & 0 & 1,339,102 & 71.3 \\ \hline
+Reads 0 \% & 45,566,033 & 41,036,029 & 119 & 7,700,483 & 9.9 \\ \hline
+Reads 1 \% & 48,237,038 & 43,707,032 & 117 & 9,771,028 & 9.4 \\ \hline
+Reads 5 \% & 62,094,757 & 57,564,749 & 115 & 18,116,934 & 7.3 \\
 \hline
 \end{tabular}
 \caption{An exact \emph{E. coli} genome representation of 17-mers was compared with 
@@ -423,13 +423,12 @@ In contrast, when we examined an exact representation of an Illumina
 dataset, only 9.9\% of the k-mers in the graph truly exist in the
 reference genome. Note that we only counted false positive k-mers that
 are transitively connected to least one real k-mer. The
-number of 17-mers with more than 2 neighbors is proportionally higher
+number of 17-mers with more than 2 neighbors is higher
 than for the exact representation of the genome, which demonstrates
 that sequencing errors add to the complexity of the
 graph. Thus, we find that the errors demonstrated by sequencers dwarf
 the errors caused by the inexact graph representation below a
 reasonable false positive rate.
-% @CTB PROPORTIONALLY? I THINK NOT.
 
 \subsection{Graph Representation Can Be Used To Partition Sequencing Data}
 One advantage to the compressible graph is that it can be used to
