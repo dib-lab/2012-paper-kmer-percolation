@@ -351,11 +351,9 @@ in the dataset for the only component that contains real k-mers.
 We randomly generated 58bp long circular
 chromosomes to construct components containing 50 k-mers (setting $k=8$) and 
 calculated the diameter at different false positive rates, averaging
-the results from multiple runs ($n=20$).
-% I had to set k to be low because I wanted to go beyond the percolation
-% threshold, and I couldn't think of a straightforward way to handle it
-% for a high value of k...n=100 or whatever would be pretty easy...I just 
-% wanted to get the graph generated
+the results from multiple runs ($n=10$). For each false positive rate, we 
+repeated the 10 runs an additional 200 times to obtain 2.5 and 97.5 
+percentiles. 
 As Figure 3 shows, 
 erroneous connections between pairs of ``real'' k-mers are unlikely
 below the 
@@ -364,7 +362,7 @@ between real k-mers are created, which lowers the diameter.
 Thus, the larger scale graph structure is retained until $p=0.183$, as suggested by the cluster size analysis and percolation results.
 
 \begin{figure}
-\center{\includegraphics[width=5in]{figures/diameter}}
+\center{\includegraphics[width=5in]{figures/newdiam}}
 \caption{Length of Longest Shortest Path by False Positive Rate. The 
 length of the longest shortest path of randomly generated 58bp 
 long circular chromosomes in 8-mer 
