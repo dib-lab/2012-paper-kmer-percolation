@@ -43,10 +43,10 @@ De novo assembly of shotgun sequencing data sets is extremely memory
 intensive, and it is now easy to generate more sequencing data than
 can be handled on commodity computing hardware.  This is especially
 true in metagenomics, where assembling shotgun sequences
-from complex microbial samples required 512 GB or more of RAM
-(MetaHit, rumen).  Assembling transcriptome data from non-model
+from complex microbial samples required 512 GB or more of 
+RAM\cite{pmid20203603, pmid21273488}.  Assembling transcriptome data from non-model
 organisms also requires substantial amounts of memory, e.g. 1 GB of
-RAM per million reads (Trinity).  These substantial memory requirements for
+RAM per million reads\cite{trinity}.  These substantial memory requirements for
 assembling large data sets are increasingly becoming an obstacle to
 sequence analysis in metagenomics and transcriptomics (refs).
 
@@ -58,7 +58,7 @@ graph.  This graph is then traversed to determine contiguous sequences
 made from overlapping k-mers.  Because de Bruijn graphs store only
 k-mers, memory usage scales with the number of unique k-mers in the
 data set rather than the number of reads.  Thus human genomes can be
-assembled in as little as 512 GB of RAM(ref ALLPATHS-LG).  For
+assembled in as little as 512 GB of RAM\cite{pmid21187386}.  For
 more complex samples such as soil metagenomes, which may possess a
 million or more species, terabytes of memory are required to store the
 graph.  With mRNA samples that require deep sequencing to sample rare
@@ -67,16 +67,16 @@ similarly large memory requirements.
 
 One approach to de novo assembly of metagenomes and transcriptomes is
 to apply graph partitioning, in which the de Bruijn graph is divided
-up into largely disconnected components (Trinity, metaIDB,
-MetaVelvet).  While the initial partitioning step is as memory
+up into largely disconnected components\cite{trinity, metavelvet} (+ metaIDB). 
+While the initial partitioning step is as memory
 intensive as assembly, once the graph is partitioned the components
 can be assembled individually with parameters chosen for each
 component (cite).  This results in improved assemblies, but does not
 address memory scaling.
 
-To apply partitioning to memory scaling , we here describe a novel
+To apply partitioning to memory scaling, we here describe a novel
 probabilistic representation for storing de Bruijn graphs in memory,
-based on Bloom filters (citations).  Bloom filters are constant-memory
+based on Bloom filters\cite{bloom}.  Bloom filters are constant-memory
 probabilistic data structures for storing sets; essentially hash
 tables without collision detection, they can yield false positives on
 set membership queries, but not false negatives.  We show that this
@@ -91,18 +91,16 @@ transition in false connectivity near a false positive rate of 0.183,
 corresponding to a lower memory limit of 6 bits per graph node.
 
 % @@ figure for how we're storing DBGs in a Bloom filter.
-% @@ push ecoli % to 15% memory
 % @@ exact/inexact data influence
 
 \section{Methods}
 
 \subsection{Genome and Sequence Data}
-We used \emph{E. coli} K-12 MG1655 genome (GenBank: U00096.2) and two MG1655 Illumina 
-datasets (Short Read Archive accessions SRX000429 and SRX000430). 
+We used the \emph{E. coli} K-12 MG1655 genome (GenBank: U00096.2) and two MG1655 Illumina 
+datasets (Short Read Archive accessions SRX000429 and SRX000430) for some
+analyses. 
 
 \subsection{Data Structure Implementation}
-% @JAP I added and merged some stuff, but I think the language needs to be 
-% more ``direct''
 We implemented a variation on the Bloom filter data structure to store
 k-mers in memory. In a classic Bloom filter, multiple hash functions
 map into a single hash table to add an object or test for the presence
@@ -141,9 +139,7 @@ to use by calculating
 \vert H \vert_{opt} = \ln 2 \frac{m}{k}
 \end{displaymath}
 where $m$ is the amount of memory in bits to allocate and $k$
-is the number of unique k-mers to be inserted. Figure 1 
-contains memory efficiency for selected false positive rates 
-using the calculation. Finally,
+is the number of unique k-mers to be inserted. Finally,
 the number of bits per
 k-mer used in the data structure for the optimal number of hash 
 tables is
@@ -226,7 +222,6 @@ the F-statistic
 \begin{displaymath}
 F=\frac{RSS_1-RSS_2}{p_2-p_1} \times \frac{n - p_2}{RSS_2}
 \end{displaymath}
-% @CTB DEFINE RSS, p, n
 
 where $RSS_i$ is the residual sum of squares for model $i$, $p_i$ is 
 the number of parameters for model $i$, and $n$ is the number of data 
@@ -503,9 +498,9 @@ diameter calculations, and partitioning of simulated data demonstrate
 that below the calculated percolation threshold this is not a
 significant problem.  As long as the expected rate of false edges is
 below one per node, long false paths are not spontaneously created and
-hence the graph is falsely connected.  While the E. coli partitioning
+hence the graph is falsely connected.  While the \emph{E. coli} partitioning
 does show some false connectivity, this is probably due to the
-unrealistic way in which we broke up the E. coli data; in reality, we
+unrealistic way in which we broke up the \emph{E. coli} data; in reality, we
 would expect disconnected components to be separated by more than one
 node.  Regardless, falsely connected partitions can easily be broken
 up by iterative partitioning, in which partitions resulting from the
@@ -557,8 +552,8 @@ general a more memory efficient de Bruijn graph representation may
 open up many opportunites.  While de Bruijn graph approaches are being
 used primarily for the purposes of assembly, they are a broadly useful
 formalism for sequence analysis. In particular, efforts have been made
-to extend them to multiple-sequence alignment (zhang and waterman),
-repeat discovery (pevzner etc.), detection of local variation and
+to extend them to multiple-sequence alignment\cite{zhang2003dna},
+repeat discovery\cite{price2005novo}, detection of local variation and
 structural variant detection (zerbino etc.).  We and collaborators are
 also exploring the use of de Bruijn graphs for graph-based homology
 search and artifact detection in large sequencing data sets.  While de
