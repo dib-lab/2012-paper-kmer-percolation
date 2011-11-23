@@ -274,9 +274,6 @@ positive rate is sufficiently high, the resulting graph is
 (practically speaking) impossible to visualize due to the effect of
 erroneous k-mers connecting to other erroneous k-mers.
 
-% @CTB I thought percolation threshold was independent of k?  Why does
-% large k affect anything??
-
 \begin{figure}
 \includegraphics[width=3in]{figures/f3b001}
 \includegraphics[width=3in]{figures/f3b005}\\
@@ -476,8 +473,6 @@ The use of Bloom filters to store an implicit de Bruijn graph is
 straightforward and quite memory efficient.  The expected false
 positive can be tuned based on hash table occupancy, yielding a wide
 range of possible storage efficiences.
-
-% @@ show table with bits etc.
 
 Even for low false positive rates such as 5\%, this is still a very
 efficient graph representation, with an observed 20-fold improvement
