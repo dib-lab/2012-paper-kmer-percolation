@@ -34,7 +34,7 @@ independent of the k chosen.
 We demonstrate the
 utility of this representation for graph partitioning, an approach
 that decreases memory and compute requirements for sequence assembly
-by decomposing de Bruijn graphs into disconnected components.
+by decomposing de Bruijn graphs into distinct components.
 
 \section{Introduction}
 
@@ -66,7 +66,7 @@ similarly large memory requirements \cite{trinity}.
 
 One approach to de novo assembly of metagenomes and transcriptomes is
 to apply graph partitioning, in which the de Bruijn graph is divided
-up into disconnected components \cite{trinity, metavelvet,pubmed21685107}.
+up into distinct components \cite{trinity, metavelvet,pubmed21685107}.
 While the initial partitioning step is as memory
 intensive as assembly, once the graph is partitioned the components
 can be assembled individually with parameters chosen for each
@@ -148,7 +148,7 @@ tables is
 \frac{m}{n} = \frac{1}{\ln(2)} \log{\frac{1}{P_f}}.
 \end{displaymath}
 
-\begin{figure}
+\begin{table}
 \center{\begin{tabular}{ | c | c | }
 \hline
 $f_p$ & Bits/k-mer \\ \hline
@@ -160,7 +160,7 @@ $f_p$ & Bits/k-mer \\ \hline
 \caption{The number of bits needed to store each k-mer for selected
 false positive rates.  These numbers are independent of the specific k
 chosen.}
-\end{figure}
+\end{table}
 
 \subsection{Using The Bloom Filter As A K-mer Graph}
 % @CTB FIGURE
@@ -200,13 +200,13 @@ appear. However, it is not immediately clear at exactly what
 false positive rate this occurs. We address this below.  % clumsy, I know.
 
 \subsection{Estimating False Positive Rate For Erroneous Connectivity}
-We ran a simulation to find when connected components in the graph 
+We ran a simulation to find when components in the graph 
 begin to erroneously connect to one another.
 To calculate the false positive rate $p$ at which this aberrant 
 connectivity occurs, 
 we added random k-mers, sampled from a uniform GC distribution, to the data structure 
 and then calculated the occupancy and size of 
-the largest connected 
+the largest 
 component. From this we sampled the relative size of 
 the largest component and the overall cluster size distribution for each
 given occupancy rate.
@@ -232,13 +232,13 @@ of the F-values \cite{wald43}.
 
 \subsection{Graph Partitioning Using A Bloom Filter}
 We used the Bloom filter data structure containing the k-mers from a
-dataset to discover disconnected components of the graph, i.e. to
-partition the graph.  Here a connected component is a set of k-mers
+dataset to discover components of the graph, i.e. to
+partition the graph.  Here a component is a set of k-mers
 whose originating reads overlap transitively by at least $k$ base
 pairs.  To partition the reads, we tag the graph at a minimum density
 by using the underlying reads as a guide. We then exhaustively explore
 the graph around these tags in order to connect tagged k-mers based on
-graph connectivity.  The underlying reads in each connected component
+graph connectivity.  The underlying reads in each component
 can then be separated and analyzed individually without affecting the
 overall result, because they do not connect outside that read set.
 
@@ -263,7 +263,7 @@ generated a random 1,031bp circular sequence to visualize the effect of false
 positives.  After storing this sequence in compressible graphs using
 $k=31$ with four different false positive rates ($p_f$=0.01, 0.05,
 0.10, and 0.15), we explored the graph using breadth-first search
-beginning at the first 31-mer.  The graphs in Figure 2 demonstrate how
+beginning at the first 31-mer.  The graphs in Figure 1 demonstrate how
 the local graph structure elaborates with the false positive rate
 while the overall circular graph structure remains, with no erroneous
 shortcuts between k-mers that are present in the original
@@ -298,16 +298,16 @@ to how the global graph structure degrades.
 We wanted to explore the point at which our data structure systematically 
 engenders false long-range connections, 
 so we inserted random 31-mers into Bloom
-filters with increasing false positive rates and calculated the average
-cluster size for each false positive rate. Figure 3 demonstrates that 
+filters with increasing false positive rates and estimated the average
+cluster size for each false positive rate ($n=10000$). Figure 2 demonstrates that 
 the average cluster
 size rapidly increases as a specific threshold is approached,
 which appears to be at a FP rate near 0.18 for k=31. Beyond 0.18, 
-the connected components begin to join together as a single giant 
-cluster, and it is no longer possible to find disconnected graph components.
+the components begin to join together as a single giant 
+cluster, and small components are more rare.
 
 \begin{figure}
-\center{\includegraphics[width=5in]{newclustersize}}
+\center{\includegraphics[width=5in]{newclust}}
 \caption{Average cluster size versus false positive rate. The average 
 cluster size sharply increases as the false positive 
 rate approaches the percolation threshold.
@@ -315,8 +315,8 @@ rate approaches the percolation threshold.
 \end{figure}
 
 As the false positive rate increases, we observe a sudden
-transition from where the graph is comprised of disconnected 
-components to where these components begin to erroneously connect (Figure 3). 
+transition from where the graph is comprised of many small  
+components to where these components begin to erroneously connect (Figure 2). 
 In contrast to the linear increase in the local neighborhood structure
 as the false positive rate increases linearly, 
 the change in global graph structure is abrupt as previously disconnected 
@@ -349,19 +349,17 @@ estimation suggest that
 global connectivity of the graph is unlikely 
 to change below the percolation threshold. To verify this, we employed 
 the diameter metric in graph theory.  
-The diameter of a connected component in a graph is a measure of 
+The diameter of a component in a graph is a measure of 
 the length of the ``longest shortest'' 
 path between any two vertices\cite{bondy2008graph}.
 In our case, we only considered paths between two real k-mers
 in the dataset for the only component that contains real k-mers. 
 We randomly generated 58bp long circular
 chromosomes to construct components containing 51 8-mers and 
-calculated the diameter at different false positive rates, averaging
-the results from multiple runs ($n=10$). For each false positive rate, we 
-repeated the 10 runs an additional 200 times to obtain 2.5 and 97.5 
-percentiles.
-% @@what does this mean??
-As Figure 4 shows, 
+calculated the diameter at different false positive rates. At each 
+false positive rate, we ran the 
+simulation 500 times and estimated the mean within a 95\% 
+confidence interval. As Figure 3 shows, 
 erroneous connections between pairs of ``real'' k-mers are rare
 below the 
 percolation threshold. At or after the percolation threshold, spurious connections 
@@ -386,7 +384,7 @@ sequencing errors add to the graph complexity and make it more
 difficult to find high-quality paths for generating long, accurate
 contigs. Since our approach also generates false positives, we wanted to
 compare the error rate from the Bloom filter graph with experimental
-errors generated by sequencing (Figure 5). We used the
+errors generated by sequencing (Table 2). We used the
 \emph{E. coli} K-12 MG1665 genome to compare various graph invariants
 between an Illumina dataset generated from the same strain (see \emph{Methods}),
 an exact representation of the genome, and inexact representations
@@ -395,7 +393,7 @@ model available
 from the Velvet mailing list\footnote{http://listserver.ebi.ac.uk/pipermail/velvet-users/2009-July/000474.html} to find that Velvet needs $\sim 876$ MB 
 to assemble the dataset that we used.  This was verified computationally.
 
-\begin{figure}
+\begin{table}
 \center{\begin{tabular}{ | c || c | c | c | c | c | c |}
 \hline
 Data + FPR & No. K-mers & No. Add'l & No. Missing & Deg $\ge 2$ & \% Real & Mem (bits) \\ \hline \hline
@@ -412,7 +410,7 @@ Reads 15 \% & 235,654,877 & 231,124,854 & 100 & 85,813,621 & 1.9 & $1.8 \times 1
 \caption{An exact \emph{E. coli} genome representation of 17-mers was compared with 
 two inexact ones as well as an exact and two inexact representations of an Illumina 
 \emph{E. coli} dataset.}
-\end{figure}
+\end{table}
 
 For these comparisons, we used a $k$ value of 17, which allows for exact
 representation in memory ($4^17 \approx 17 {\rm Gbits}$). We found 
@@ -421,7 +419,7 @@ part of a simple line, i.e. had more
 than two neighbors (degree $>$ 2). As the false positive rate 
 increased, the number of these 
 17-mers increased in the expected linear fashion in addition to the number of 
-false positive 17-mers found in each connected component. Furthermore, the number of 
+false positive 17-mers found in each component. Furthermore, the number of 
 ``real'' 17-mers, those that are not false positives, 
 comprise the majority of the graph.
 % @@ linear? how so!?
@@ -439,7 +437,7 @@ reasonable false positive rate.
 
 \subsection{Sequences can be accurately partitioned by graph connectivity}
 
-Can we use this lightweight graph representation to find disconnected
+Can we use this lightweight graph representation to find 
 components in de Bruijn graphs?
 The diameter results suggest that unconnected
 components are unlikely to connect below the percolation threshold. To
@@ -447,7 +445,7 @@ show this, we broke up the \emph{E. coli} genome at k-mers with a
 degree greater than two and compared it with a simulated dataset of
 1,000 randomly generated contigs containing 10,000bp each. Using
 $k=32$, we partitioned the datasets using the procedure described in
-\emph{Methods} at different false positive rates (Figure 6). As
+\emph{Methods} at different false positive rates (Figure 4). As
 expected, the resulting number of partitions did not change for the
 simulated dataset. For the \emph{E. coli} dataset, the number of
 partitions drops slowly with increasing false positives, which is
@@ -456,12 +454,13 @@ in our simulated data set.
 % @CTB repartitioning
 
 \begin{figure}
-\center{\includegraphics[width=5in]{figures/partplot}}
+\center{\includegraphics[width=5in]{figures/newpart}}
 \caption{Number of Partitions by False Positive Rate. The 
 graph shows the resulting number of partitions for the 
-\emph{E. coli} genome broken up in high-complexity regions (blue) and 
-a simulated dataset with 1,000 contigs of 10,000 bp each (red).}
-% @@errorbars!??
+\emph{E. coli} genome broken up in high-complexity regions (dots) and 
+a simulated dataset with 1,000 contigs of 10,000 bp each (circles). For $n=5$, 
+there was no varation for the simulated dataset and some for 
+\emph{E. coli}.}
 \end{figure}
 
 \section{Discussion}
@@ -498,7 +497,7 @@ below one per node, long false paths are not spontaneously created and
 hence the large scale graph properties do not change.  While the \emph{E. coli} partitioning
 does show some false connectivity, this is probably due to the
 unrealistic way in which we broke up the \emph{E. coli} data; in reality, we
-would expect disconnected components to be separated by more than one
+would expect components to be separated by more than one
 node, i.e. to be more than 1 base apart.  Regardless, falsely connected partitions can easily be broken
 up by iterative partitioning, in which partitions resulting from the
 first round are individually partitioned again.
