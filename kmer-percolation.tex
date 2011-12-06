@@ -6,6 +6,8 @@
 
 % TEST
 
+% @@ TODO: figure for de bruijn graph
+
 \documentclass[12pt]{article} \usepackage{simplemargins}
 \usepackage[pdftex]{graphicx} \graphicspath{{figures/}}
 
@@ -14,81 +16,101 @@
 
 \begin{document}
 
-\title{A probabilistic framework for compressible assembly graphs}
+\title{Scaling de novo sequence assembly with probabilistic de Bruijn graphs}
 \author{Jason Pell, Arend Hintze, Rosangela Canino-Koning, C. Titus Brown}
 
 \maketitle
 
 \section{Abstract}
 
-The memory requirements for de novo assembly of shotgun sequencing
-data from metagenome and transcriptome samples are an increasingly
-large practical barrier to next-generation sequence analysis.  Here we
-introduce a novel probabilistic graph representation for de Bruijn
-graphs that is based on Bloom filters.  While the graph contains false nodes and
-edges due to the underlying probabilistic representation, we show that
-it can be used to assess global graph structure with high accuracy
-below a specific false positive rate.
-This enables effective storage of de Bruijn graphs with 4 bits per k-mer,
-independent of the k chosen.
-We demonstrate the
-utility of this representation for graph partitioning, an approach
-that decreases memory and compute requirements for sequence assembly
-by decomposing de Bruijn graphs into distinct components.
+The memory requirements for de novo assembly of short-read shotgun
+sequencing data from metagenome and transcriptome samples are an
+increasingly large practical barrier to environmental and evolutionary
+studies.  Here we introduce a simple ``divide and conquer'' approach
+to assembly built on a novel probabilistic graph representation for de
+Bruijn graphs.  While these graphs contains false nodes and edges due
+to the underlying probabilistic representation, we show that they can
+be used to assess global graph structure with high accuracy below a
+specific false positive rate.  This enables effective storage of de
+Bruijn graphs with 4 bits per k-mer, independent of the k chosen -- a
+dramatic improvement over current approaches.  We apply this
+representation to the problem of graph partitioning, an approach that
+decreases memory and compute requirements for sequence assembly by
+decomposing de Bruijn graphs into distinct components.
 
 \section{Introduction}
 
+There are two basic types of sequence analysis in biology: that done
+with reference sequences, and that done on biological ``unknowns'',
+without reference sequence.  As we expand our biological
+investigations to complex microbial communities in the environment and
+evolutionarily distant non-model organisms, we must increasingly rely
+on de novo assembly of sequence data to provide gene catalogs and
+reference genomes.  However, de novo assembly approaches have not
+scaled with the recent explosive growth in sequencing capacity, making
+it increasingly difficult to assemble these data sets.
+
 De novo assembly of shotgun sequencing data sets is extremely memory
-intensive, and it is now easy to generate more sequencing data than
-can be handled on commodity computing hardware \cite{pubmed21310981}.  This is especially
-true in metagenomics, where assembling shotgun sequences
-from complex microbial samples required 512 GB or more of 
-RAM\cite{pmid20203603, pmid21273488}.  Assembling transcriptome data from non-model
-organisms also requires substantial amounts of memory, e.g. 1 GB of
-RAM per million reads\cite{trinity}.  These substantial memory requirements for
-assembling large data sets are increasingly an obstacle to
-sequence analysis in metagenomics and transcriptomics \cite{trinity,pubmed21310981,pubmed21304727}.
+intensive, and we can now quickly and inexpensively generate more
+sequencing data than existing computers can handle
+\cite{pubmed21310981}; moreover, sequencing capacity continues to grow
+faster than compute capacity, signaling an end to the
+``wait-and-upgrade'' approach to scaling sequence analysis in biology.
+This is especially true in metagenomics, where assembling shotgun
+sequences from complex microbial samples already required 512 GB or
+more of RAM 2 years ago, even after substantial amounts of data were
+discarded \cite{pmid20203603, pmid21273488}.  Assembling transcriptome
+data from non-model organisms also requires large amounts of memory,
+e.g. up to 150 GB of RAM for a single sample \cite{trinity}.  These
+substantial memory requirements for assembling large data sets are
+an increasingly formidable obstacle to sequence analysis in metagenomics and
+transcriptomics \cite{trinity,pubmed21310981,pubmed21304727}.
+
+% @@ newbler fix
+% @@ cite jansson paper
 
 The predominant assembly formalism applied to short-read sequencing
 data sets from Illumina, SOLiD, and Roche 454 machines is a de Bruijn
-graph \cite{pubmed20211242,pubmed22068540}.  In a de Bruijn graph approach, sequencing reads are decomposed
-into fixed-length words, or k-mers, and used to build a connectivity
-graph.  This graph is then traversed to determine contiguous sequences
-\cite{pubmed22068540}.  Because de Bruijn graphs store only
-k-mers, memory usage scales with the number of unique k-mers in the
-data set rather than the number of reads.  Thus human genomes can be
-assembled in as little as 512 GB of RAM\cite{pmid21187386}.  For
-more complex samples such as soil metagenomes, which may possess a
-million or more species, terabytes of memory are required to store the
-graph \cite{pubmed21304727}.  With mRNA samples that require deep sequencing to sample rare
-molecules, the novel k-mers introduced by sequencing error will result in
-similarly large memory requirements \cite{trinity}.
+graph \cite{pubmed20211242,pubmed22068540}.  In a de Bruijn graph
+approach, sequencing reads are decomposed into fixed-length words, or
+k-mers, and used to build a connectivity graph.  This graph is then
+traversed to determine contiguous sequences \cite{pubmed22068540}.
+Because de Bruijn graphs store only k-mers, memory usage scales with
+the number of unique k-mers in the data set rather than the number of
+reads.  Thus human genomes can be assembled in as little as 512 GB of
+RAM\cite{pmid21187386}.  For more complex samples such as soil
+metagenomes, which may possess millions or more species, terabytes of
+memory are required to store the graph \cite{pubmed21304727}.  With
+mRNA samples that require deep sequencing to sample rare molecules,
+the novel k-mers introduced by sequencing error result in similarly
+large memory requirements \cite{trinity}.
 
 One approach to de novo assembly of metagenomes and transcriptomes is
 to apply graph partitioning, in which the de Bruijn graph is divided
 up into distinct components \cite{trinity, metavelvet,pubmed21685107}.
-While the initial partitioning step is as memory
-intensive as assembly, once the graph is partitioned the components
-can be assembled individually with parameters chosen for each
-component \cite{metavelvet,pubmed21685107}.  This results in improved assemblies, but does not
-address memory scaling.
+While the initial partitioning step is as memory intensive as
+assembly, once the graph is partitioned the components can be
+assembled individually with parameters chosen for each component
+\cite{metavelvet,pubmed21685107}.  Partitioning results in improved
+assemblies, but does not scale in memory usage because of the
+initial step.
 
-To apply partitioning to memory scaling, we here describe a novel
-probabilistic representation for storing de Bruijn graphs in memory,
-based on Bloom filters \cite{bloom}.  Bloom filters are constant-memory
-probabilistic data structures for storing sets; essentially hash
-tables without collision detection, set membership queries can yield
-false positives -- k-mers marked as present that do not actually exist --
-but not false negatives.  We show that this
+To apply partitioning to scale de novo assembly, we here describe a
+simple probabilistic representation for storing de Bruijn graphs in
+memory, based on Bloom filters \cite{bloom}.  Bloom filters are
+constant-memory probabilistic data structures for storing sets;
+essentially hash tables without collision detection, set membership
+queries can yield false positives -- k-mers marked as present that do
+not actually exist -- but not false negatives.  We show that this
 probabilistic graph representation can be used to efficiently store
 and traverse DNA de Bruijn graphs with an approximately 20-fold
 decrease in memory usage over the Velvet assembler. Moreover, this
 graph representation can be used to accurately partition assembly
-graphs.  We relate changes in local and global graph connectivity
-to the false positive rate of the underlying Bloom filters, and
-show that the graph's global structure is accurate until an abrupt
-transition in false connectivity near a false positive rate of 0.183,
-corresponding to a lower memory limit of approximately 4 bits per graph node.
+graphs.  We relate changes in local and global graph connectivity to
+the false positive rate of the underlying Bloom filters, and show that
+the graph's global structure is accurate until an abrupt transition in
+false connectivity near a false positive rate of 0.183, corresponding
+to a lower memory limit of approximately 4 bits per graph node.
 
 % @@ figure for how we're storing DBGs in a Bloom filter.
 % @@ exact/inexact data influence
@@ -467,7 +489,6 @@ there was no varation for the simulated dataset and some for
 
 \subsection{Bloom filters can be used to efficiently store de Bruijn graphs}
 
-
 The use of Bloom filters to store an implicit de Bruijn graph is
 straightforward and quite memory efficient.  The expected false
 positive can be tuned based on hash table occupancy, yielding a wide
@@ -477,8 +498,8 @@ Even for low false positive rates such as 5\%, this is still an
 efficient graph representation, with an observed 20-fold improvement
 in memory usage over one existing assembler, Velvet.  The false
 positive rates have a small effect on graph structure compared to
-sequencing errors, suggesting that this is an effective representation
-in practice as well.  Note that the false positives engendered by the
+sequencing errors, suggesting that this is an effective representation,
+practically speaking.  Note that the false positives engendered by the
 Bloom filters are uncorrelated with the original sequence, unlike
 sequencing errors which usually have a low edit distance to the
 real sequence; this may further reduce the effect of false positives
@@ -486,84 +507,113 @@ on de Bruijn graph analysis, depending on the specific application.
 
 \subsection{Preservation of long-range structure permits graph partitioning}
 
-Using Bloom filters raises the spectre of systematic graph artifacts
-resulting from the false positives.  For partitioning, one concern is
-that false positives will incorrectly connect components, rendering
-partitioning ineffective.  Our results from percolation analysis,
-diameter calculations, and partitioning of simulated data demonstrate
-that below the calculated percolation threshold this is not a
-significant problem.  As long as the expected rate of false edges is
-below one per node, long false paths are not spontaneously created and
-hence the large scale graph properties do not change.  While the \emph{E. coli} partitioning
-does show some false connectivity, this is probably due to the
-unrealistic way in which we broke up the \emph{E. coli} data; in reality, we
-would expect components to be separated by more than one
-node, i.e. to be more than 1 base apart.  Regardless, falsely connected partitions can easily be broken
-up by iterative partitioning, in which partitions resulting from the
-first round are individually partitioned again.
+Using a probabilistic graph representation with false positive nodes
+and edges raises the spectre of systematic graph artifacts resulting
+from the false positives.  For partitioning, one concern is that false
+positives will incorrectly connect components, rendering partitioning
+ineffective.  Our results from percolation analysis, diameter
+calculations, and partitioning of simulated data demonstrate that
+below the calculated percolation threshold this is not a significant
+problem.  As long as the expected rate of false edges is sufficiently
+low, long false paths are not spontaneously created and hence the
+large scale graph properties do not change.  While the \emph{E. coli}
+partitioning does show some false connectivity, this is probably due
+to the unrealistic way in which we broke up the \emph{E. coli} data;
+in reality, we would expect components to be separated by more than
+one node, i.e. to be more than 1 base apart.  Regardless, falsely
+connected partitions can easily be broken up by iterative
+partitioning, in which individually partitions resulting from the first round are
+partitioned again with different false positives.
 
 Combined with the scaling properties of the graph representation,
-partitioning offers a way to efficiently apply a "divide and conquer"
-strategy to assembly problems.  The next challenge is to develop an
+partitioning offers a way to efficiently apply a ``divide and conquer''
+strategy to assembly problems.  One challenge is to develop an
 efficient way for finding breakpoints, or equivalently to characterize
 minimally connected components; existing graph algorithms for
-e.g. "betweenness centrality" do not scale to graphs with millions or
+e.g. ``betweenness centrality'' do not scale to graphs with millions or
 billions of nodes.
 
-There are several biological problems that particularly well suited to
-a partitioning approach.  Unlike genomes, where the assembly graph is
-usually entirely connected due to repeats, transcriptomes and
-metagenomes consist of populations of largely {\em disconnected}
-sequences.  This has been exploited for assembly improvement.
-Trinity, for example, relies on a partitioning approach in the second
-phase of transcriptome assembly; and both Meta-IDBA and
-MetaVelvet rely on locality of connections for metagenome assembly
-\cite{trinity,pubmed21685107,metavelvet}.
-These algorithms, however, rely on exact graph representations that are
-more memory intensive than the one described above.
+It is perhaps more productive to consider problems where the
+underlying biological structure of the data lends itself to
+partitioning.  There are several biological problems that are
+particularly well suited to a partitioning approach.  Unlike genomes,
+where the assembly graph is usually entirely connected due to repeats,
+transcriptomes and metagenomes consist of populations of largely {\em
+  disconnected} sequences.  This has already been exploited for
+assembly improvement: Trinity, for example, relies on a partitioning
+approach in the second phase of transcriptome assembly; and both
+Meta-IDBA and MetaVelvet rely on locality of connections for
+metagenome assembly \cite{trinity,pubmed21685107,metavelvet}.  These
+algorithms, however, rely on exact graph representations that are more
+memory intensive than the one presented here.  The probabilistic de
+Bruijn graph representation may be an effective way to scale all of
+these approaches.
 
 \subsection{Concluding thoughts}
 
+% @@ mention utility for trinitiy, etc.
+% @@ read, cite referenes from pop
+
+Developing efficient and accurate approaches to de novo assembly
+continues to be one of the ``grand challenges'' of bioinformatics,
+with significant implications for investigation of life on Earth, much
+of which has not been sampled (cite).  While our appreciation is
+growing for the role that microbes play in biogeochemical processes,
+we are increasingly limited by our ability to analyze the data.  For
+example, the Earth Microbiome Project is generating petabytes of
+sequencing data from complex microbial communities, many of which
+contain entirely novel ensembles of microbes; scaling de novo assembly
+is a critical part of this investigation (cite).  Furthermore, scaling
+de novo assembly should result in improved assemblies, as it will
+allow more compute-intensive algorithms to be applied; this is
+especially true for divide-and-conquer approaches, which can be scaled
+so dramatically.
+
 The probabilistic de Bruijn graph representation presented here has a
-number of convenient features.  First, it is compressible: for a given
-data set, a wide range of false positive rates can be chosen without
+number of convenient features for storing and analyzing large assembly
+graphs.  First, it is efficient and compressible: for a given data
+set, a wide range of false positive rates can be chosen without
 impacting the global structure of the graph, allowing graph storage in
 as little as 4 bits per k-mer.  Because a higher false positive rate
-yields a more elaborate local structure, memory can be
-traded for traversal time in e.g. partitioning.  Second, it is
-constant memory, with predictable degradation of both local and global
+yields a more elaborate local structure, memory can be traded for
+traversal time in e.g. partitioning.  Second, it is a constant memory
+data structure, with predictable degradation of both local and global
 structure as more data is inserted.  For data sets where the number of
 unique k-mers is not known in advance, the occupancy of the data
 structure can be monitored as data is inserted and directly converted
 to an expected false positive rate.  Third, the memory usage is
 independent of the k-mer size chosen, making this representation
 convenient for exploring properties at many different parameters.  It
-even allows the storage and traversal of k-mer graphs at multiple k-mer
-sizes within a single structure, although we have not yet explored these
-properties.
+also allows the storage and traversal of k-mer graphs at multiple
+k-mer sizes within a single structure, although we have not yet
+explored these properties.
 
-Our initial motivation for developing this use of Bloom filters was to explore
-partitioning as an approach to scaling metagenome and transcriptome
-assembly, but we find many additional uses beyond partitioning. In
-general a more memory efficient de Bruijn graph representation may
-open up many opportunities.  While de Bruijn graph approaches are currently being
-used primarily for the purposes of assembly, they are a broadly useful
-formalism for sequence analysis. In particular, efforts have been made
-to extend them to multiple-sequence alignment\cite{zhang2003dna},
-repeat discovery\cite{price2005novo}, detection of local variation and
-structural variant detection \cite{zerbinothesis}.  We and collaborators are
-also exploring the use of de Bruijn graphs for graph-based homology
-search and artifact detection in large sequencing data sets.  While de
-Bruijn graphs have traditionally been viewed as heavy weight
-computational solutions due to the extremely large memory
-requirements, our initial investigations into the PDBG described here
-demonstrate a $\approx$ 20-fold decrease in memory requirements over
-Velvet.  This may translate into similar memory savings in these
-other applications.  One significant caveat to this reduced memory
-usage is that as only the graph structure itself is stored in the
-Bloom filters, additional information such as node weights and
-traversal waypoints will take up additional memory.  Such questions
-remain to be explored in future work.
+Our initial motivation for developing this use of Bloom filters was to
+explore partitioning as an approach to scaling metagenome and
+transcriptome assembly, but there are many additional uses beyond
+partitioning. In general a more memory efficient de Bruijn graph
+representation may open up many opportunities.  While de Bruijn graph
+approaches are currently being used primarily for the purposes of
+assembly, they are a broadly useful formalism for sequence
+analysis. In particular, they have been extended to efficient
+multiple-sequence alignment\cite{zhang2003dna}, repeat
+discovery\cite{price2005novo}, and detection of local and structural
+sequence variation \cite{zerbinothesis}.  We and others are also
+exploring the use of de Bruijn graphs for graph-based homology search
+and artifact detection in large sequencing data sets (Fish et al.,
+unpublished; Howe et al., unpublished).  The ability to scale graph
+storage by a factor of 10 or more may open up additional uses as well.
+
+%While de Bruijn graphs have traditionally been viewed as
+%heavy weight computational solutions due to the extremely large memory
+%requirements, our initial investigations into the PDBG described here
+%demonstrate a $\approx$ 20-fold decrease in memory requirements over
+%Velvet.  This may translate into similar memory savings in these other
+%applications.  One significant caveat to this reduced memory usage is
+%that as only the graph structure itself is stored in the Bloom
+%filters, additional information such as node weights and traversal
+%waypoints will take up additional memory.  Such questions remain to be
+%explored in future work.
 
 \subsection{Acknowledgements}
 
