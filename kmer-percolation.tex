@@ -9,6 +9,7 @@
 % TEST
 
 % @@ TODO: figure for de bruijn graph
+% @@ funding
 
 \documentclass[12pt]{article} \usepackage{simplemargins}
 \usepackage[pdftex]{graphicx} \graphicspath{{figures/}}
@@ -208,13 +209,14 @@ or smaller size for the underlying Bloom filters; a larger size admits fewer
 false positives, while a smaller size admits more. By relying on Bloom
 filters, the data structure is constant memory: no extra memory is
 used as additional data is added. However, as memory is decreased or data
-is increased,false positive vertices and edges are gained, so
+is increased, false positive vertices and edges are gained, so
 compressing the graph results in a more tightly interconnected graph.
 
 In contrast to an exact approach, there is a chance that a k-mer 
 will be adjacent to a false positive,
 that is, a k-mer
-that does not actually exist in the original dataset but registers as present.
+that does not actually exist in the original dataset but registers as present
+in the Bloom filter.
 If the false positive rate is too high, the 
 graph can become dominated by false connectivity. 
 Intuitively, it is clear that when most real k-mers
@@ -270,7 +272,8 @@ overall result, because they do not connect outside that read set.
 
 \subsection{Software and Software Availability}
 
-We have implemented this compressible graph representation in a
+We have implemented this compressible graph representation and the associated
+partitioning algorithm in a
 software package named khmer.  It is written in C++ and Python 2.6 and
 is available under the BSD open source license at
 https://github.com/ctb/khmer.  The graphviz software package was used
@@ -281,8 +284,8 @@ paper are available in the khmer repository.
 
 \subsection{False positives cause local elaboration of graph structure}
 
-We wanted to understand how erroneous neighbors created by false
-positives can alter the local graph structure, so we 
+To understand how erroneous neighbors created by false
+positives can alter the local graph structure, we 
 generated a random 1,031bp circular sequence to visualize the effect of false
 positives.  After storing this sequence in compressible graphs using
 $k=31$ with four different false positive rates ($p_f$=0.01, 0.05,
@@ -400,7 +403,7 @@ considered for starting and ending points.}
 \end{figure}
 
 \subsection{Sequencing errors eclipse false positives}
-One important consideration for the usefulness of the
+One important consideration for the utility of the
 k-mer graph representation is how it compares to graphs built from
 real data from massively parallel sequencers such as Illumina, which
 contains base calling errors.  In de Bruijn graph-based assemblers,
@@ -437,7 +440,7 @@ two inexact ones as well as an exact and two inexact representations of an Illum
 \end{table}
 
 For these comparisons, we used a $k$ value of 17, which allows for exact
-representation in memory ($4^17 \approx 17 {\rm Gbits}$). We found 
+representation in memory ($4^{17} \approx 17 {\rm Gbits}$). We found 
 a total of 50,605 17-mers in the exact representation that were not
 part of a simple line, i.e. had more 
 than two neighbors (degree $>$ 2). As the false positive rate 
@@ -540,7 +543,7 @@ underlying biological structure of the data lends itself to
 partitioning.  There are several biological problems that are
 particularly well suited to a partitioning approach.  Unlike genomes,
 where the assembly graph is usually entirely connected due to repeats,
-transcriptomes and metagenomes consist of populations of largely {\em
+transcriptomes and metagenomes consist of populations of many {\em
   disconnected} sequences.  This has already been exploited for
 assembly improvement: Trinity, for example, relies on a partitioning
 approach in the second phase of transcriptome assembly; and both
@@ -568,8 +571,8 @@ contain entirely novel ensembles of microbes; scaling de novo assembly
 is a critical part of this investigation (cite).  Furthermore, scaling
 de novo assembly should result in improved assemblies, as it will
 allow more compute-intensive algorithms to be applied; this is
-especially true for divide-and-conquer approaches, which can be scaled
-so dramatically.
+especially true for divide-and-conquer approaches, which scale
+dramatically.
 
 The probabilistic de Bruijn graph representation presented here has a
 number of convenient features for storing and analyzing large assembly
@@ -619,7 +622,12 @@ storage by a factor of 10 or more may open up additional uses as well.
 
 \subsection{Acknowledgements}
 
-Jim Cole and Jordan Fish.  Qingpeng.  Adina.  Adami.  JGI folk.
+We thank Qingpeng Zhang, Adina Howe, and Chris Adami for valuable
+discussion and their insights, and Jim Cole and Jordan Fish for
+discussion of future applications.  This work was supported by USDA
+grant XXXX and NSF grant XXX.
+
+@@funding.
 
 \bibliographystyle{abbrv}
 \bibliography{kmer-percolation}
