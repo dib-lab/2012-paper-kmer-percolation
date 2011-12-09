@@ -27,19 +27,15 @@
 \section{Abstract}
 
 The memory requirements for de novo assembly of short-read shotgun
-sequencing data from metagenome and transcriptome samples are an
-increasingly large practical barrier to environmental and evolutionary
-studies.  Here we introduce a simple ``divide and conquer'' approach
-to assembly built on a novel probabilistic graph representation for de
-Bruijn graphs.  While these graphs contains false nodes and edges due
-to the underlying probabilistic representation, we show that they can
-be used to assess global graph structure with high accuracy below a
-specific false positive rate.  This enables effective storage of de
-Bruijn graphs with 4 bits per k-mer, independent of the k chosen -- a
-dramatic improvement over current approaches.  We apply this
-representation to the problem of graph partitioning, an approach that
-decreases memory and compute requirements for sequence assembly by
-decomposing de Bruijn graphs into distinct components.
+sequencing data from complex microbial populations are an increasingly
+large practical barrier to environmental studies.  Here we introduce a
+simple probabilistic graph representation for de Bruijn assembly
+graphs based on Bloom filters.  This data structure can store assembly
+graphs with 4 bits per k-mer, independent of the specific k -- a
+dramatic improvement over current approaches.  We show that despite
+the false positive nodes and edges in the graph resulting from the
+representation, it can be used to scale partitioning, a ``divide and
+conquer'' approach to metagenome assembly.
 
 \section{Introduction}
 
@@ -467,20 +463,19 @@ explored these properties.
 Our initial motivation for developing this use of Bloom filters was to
 explore partitioning as an approach to scaling metagenome assembly,
 but there are many additional uses beyond metagenomics.  Partitioning
-has been applied to mRNAseq assembly as well, so this may be useful
-for scaling transcriptome assembly \cite{trinity}.  In general a more
-memory efficient de Bruijn graph representation may open up many
-opportunities.  While de Bruijn graph approaches are currently being
-used primarily for the purposes of assembly, they are a broadly useful
-formalism for sequence analysis. In particular, they have been
+has been applied to mRNAseq assembly as well, so this may also be
+useful for scaling transcriptome assembly \cite{trinity}.  In general
+a more memory efficient de Bruijn graph representation may open up
+many opportunities.  While de Bruijn graph approaches are currently
+being used primarily for the purposes of assembly, they are a broadly
+useful formalism for sequence analysis. In particular, they have been
 extended to efficient multiple-sequence alignment\cite{zhang2003dna},
 repeat discovery\cite{price2005novo}, and detection of local and
-structural sequence variation \cite{zerbinothesis}.  We and others are
-also exploring the use of de Bruijn graphs for graph-based homology
-search and artifact detection in large sequencing data sets (Fish et
-al., unpublished; Howe et al., unpublished).  The ability to scale
-graph storage by a factor of 10 or more may open up additional uses as
-well.
+structural sequence variation \cite{zerbinothesis}.  We are also
+exploring the use of de Bruijn graphs for graph-based homology search
+and artifact detection in large sequencing data sets.  The ability to
+scale graph storage by a factor of 10 or more may also result in
+additional uses for de Bruijn graphs.
 
 %While de Bruijn graphs have traditionally been viewed as
 %heavy weight computational solutions due to the extremely large memory
@@ -495,10 +490,10 @@ well.
 
 \subsection{Acknowledgements}
 
-We thank Qingpeng Zhang, Adina Howe, and Chris Adami for valuable
-discussion and their insights, and Jim Cole and Jordan Fish for
-discussion of future applications.  This work was supported by USDA
-grant XXXX and NSF grant XXX.
+We thank Chris Adami, Qingpeng Zhang, Adina Howe, and Tracy Teal for
+their insights, and Jim Cole and Jordan Fish for discussion of future
+applications.  This work was supported by USDA grant XXXX and NSF
+grant XXX.
 
 % @CTB mention k_0 > k_1 etc.
 @@funding.
