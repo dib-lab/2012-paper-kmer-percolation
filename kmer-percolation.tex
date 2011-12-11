@@ -195,7 +195,8 @@ To explore the point at which our data structure systematically
 engenders false long-range connections, we inserted random 31-mers
 into Bloom filters with increasing false positive rates.  We then
 estimated the average cluster size for each false positive rate
-($n=10000$). Figure 2 demonstrates that the average cluster size
+($n=10,000$) and used percentile bootstrap to obtain estimates within a 
+95\% confidence interval. Figure 2 demonstrates that the average cluster size
 rapidly increases as a specific threshold is approached, which appears
 to be at a FP rate near 0.18 for k=31. Beyond 0.18, the components
 begin to join together as a single giant cluster, and small components
@@ -248,10 +249,11 @@ graph is a measure of the length of the ``longest shortest'' path
 between any two vertices\cite{bondy2008graph}.  In our case, we only
 considered paths between two real k-mers in the dataset for the only
 component that contains real k-mers.  We randomly generated 58bp long
-circular chromosomes to construct components containing 51 8-mers and
+circular chromosomes to construct components containing 50 8-mers and
 calculated the diameter at different false positive rates. At each
 false positive rate, we ran the simulation 500 times and estimated the
-mean within a 95\% confidence interval. As Figure 3 shows, erroneous
+mean within a 95\% confidence interval using percentile bootstap. As 
+Figure 3 shows, erroneous
 connections between pairs of ``real'' k-mers are rare below the
 percolation threshold. For false positive rates at or above the
 percolation threshold, spurious connections between real k-mers are
