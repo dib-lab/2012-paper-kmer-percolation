@@ -75,7 +75,7 @@ Shotgun sequencing produces hundreds of millions or billions of short
 sequences that are randomly read from the sample, and assembly of
 these short sequences into longer, non-redundant sequences is
 critically important for gene content analysis.  The process of
-sequence assemby relies upon overlap analysis between many short
+sequence assembly relies upon overlap analysis between many short
 sequences, and efficient overlap analysis in turn requires a
 substantial amount of working memory in order to store these overlaps.
 
@@ -253,7 +253,7 @@ component that contains real k-mers.  We randomly generated 58bp long
 circular chromosomes to construct components containing 50 8-mers and
 calculated the diameter at different false positive rates. At each
 false positive rate, we ran the simulation 500 times and estimated the
-mean within a 95\% confidence interval using percentile bootstap. As Figure \ref{fig:diam} shows, erroneous
+mean within a 95\% confidence interval using percentile bootstrap. As Figure \ref{fig:diam} shows, erroneous
 connections between pairs of ``real'' k-mers are rare below the
 percolation threshold. For false positive rates at or above the
 percolation threshold, spurious connections between real k-mers are
@@ -347,7 +347,7 @@ under 1.5 GB to partition and assemble -- an improvement of over
 The use of Bloom filters to store an implicit de Bruijn graph is
 straightforward and memory efficient.  The expected false positive
 rate can be tuned based on hash table occupancy, yielding a wide range
-of possible storage efficiences.
+of possible storage efficiencies.
 
 Even for low false positive rates such as 5\%, this is still an
 efficient graph representation, with an observed 20-fold improvement
@@ -405,8 +405,8 @@ memory usage.
 
 \subsection{Concluding thoughts}
 
-% @@ mention utility for trinitiy, etc.
-% @@ read, cite referenes from pop
+% @@ mention utility for trinity, etc.
+% @@ read, cite references from pop
 
 Developing efficient and accurate approaches to de novo assembly
 continues to be one of the ``grand challenges'' of bioinformatics,
@@ -574,6 +574,8 @@ separated based on their partition.
 \section{Assembler software}
 
 We used ABySS v1.3.1 and Velvet v1.1.07 to perform assemblies (cite).
+The ABySS command was: {\tt mpirun -np 8 ABYSS-P -k31 -o contigs.fa reads.fa}.
+The Velvet commands were: {\tt velveth test 31 -fasta -short reads.fa \&\& velvetg test}.
 We did not use Velvet for the partitioning analysis because Velvet has
 a stochastic component during error correction that results in
 dissimilar assemblies when read order is changed, and hence the
@@ -719,10 +721,10 @@ The graph is traversed by starting with a k-mer and then testing all possible 1-
 \end{figure}
 
 \begin{figure}
-\includegraphics[width=2.5in]{figures/f3b001}
-\includegraphics[width=2.5in]{figures/f3b005}\\
-\includegraphics[width=2.5in]{figures/f3b010}
-\includegraphics[width=2.5in]{figures/f3b015}
+\includegraphics[width=2in]{figures/f3b001}
+\includegraphics[width=2in]{figures/f3b005}
+\includegraphics[width=2in]{figures/f3b010}
+\includegraphics[width=2in]{figures/f3b015}
 \caption{Graph visualizations demonstrating the decreasing 
 fidelity of graph structure with increasing false positive rate. From 
 top left to bottom right, the false positive rates are 0.01, 0.05, 0.10, 
