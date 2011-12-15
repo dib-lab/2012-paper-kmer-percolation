@@ -1,28 +1,49 @@
 % NOTES:
 %%    do we want to explore for larger S?  Does false positive rate change?
 
-% review: first round, chris, yanni, jin, charles, enbody
-% cole/jordan, chris hart, curt, james foster, abdol.
+% TODO:
+%   reference tables!!
 
-% second round: dan rokshar
-
-% TEST
-
-\documentclass[12pt]{article} \usepackage{simplemargins}
-\usepackage[pdftex]{graphicx} \graphicspath{{figures/}}
-
-\setlength{\parindent}{0pt} \setlength{\parskip}{1.6ex}
-\setallmargins{1in} \linespread{1.6}
+\documentclass{pnastwo}
+\usepackage[pdftex]{graphicx}
+\graphicspath{{figures/}}
 
 \begin{document}
 
-\title{Scaling de novo sequence assembly with probabilistic de Bruijn graphs}
-\author{Jason Pell, Arend Hintze, Rosangela Canino-Koning, Adina Howe, \\
-James M. Tiedje,  C. Titus Brown}
+\title{Scaling metagenome sequence assembly with probabilistic de Bruijn
+graphs}
+
+\author{
+Jason Pell
+\affil{1}{Michigan State University, East Lansing, MI, United States}
+\and
+Arend Hintze
+\affil{1}{}
+\and
+Rosangela Canino-Koning
+\affil{1}{}
+\and
+Adina Howe
+\affil{1}{}
+\and
+James M. Tiedje
+\affil{1}{}
+\and
+C. Titus Brown
+\affil{1}{}
+}
 
 \maketitle
 
-\section{Abstract}
+%{\center
+%Classification:\\
+%Physical Sciences, Computer Sciences;\\
+%Biological Sciences, Biophysics and Computational Biology\\
+%}
+
+\begin{article}
+
+\begin{abstract}
 
 The memory requirements for de novo assembly of short-read shotgun
 sequencing data from complex microbial populations are an increasingly
@@ -34,6 +55,10 @@ dramatic improvement over current approaches.  We show that despite
 the false positive nodes and edges in the graph resulting from the
 representation, it can be used to scale partitioning, a ``divide and
 conquer'' approach to metagenome assembly.
+
+\end{abstract}
+
+\keywords{metagenomics | de novo assembly | de Bruijn graphs | k-mers}
 
 \section{Introduction}
 
@@ -119,14 +144,6 @@ required for assembly.
 
 \subsection{Bloom filters can store k-mer graphs}
 
-\begin{figure}
-\center{\includegraphics[width=5in]{bloomgraph}}
-\caption{Storing k-mer graphs in Bloom filters.  Longer sequences are broken down into k-mers (here, k=6) and stored in the Bloom filter.
-The graph is traversed by starting with a k-mer and then testing all possible 1-base postfixes for presence in the Bloom filter.}
-
-\label{fig:bloomgraph}
-\end{figure}
-
 Given a set of short DNA sequences, or reads, we first break down each
 read into a set of overlapping k-mers.  We then store each k-mer
 in a Bloom filter.  Each k-mer serves as a vertex in a graph, with an edge
@@ -142,21 +159,6 @@ which means that there can be no self-loops or parallel edges between
 vertices/k-mers. This graph representation is constant in its memory
 usage, so only ancillary information such as list of vertices visited
 or waypoints in the graph consumes additional memory.
-
-\begin{table}
-\center{\begin{tabular}{ | c | c | }
-\hline
-$f_p$ & Bits/k-mer \\ \hline
-0.1 \% & 14.35 \\ \hline1 \% & 9.54 \\ \hline
-5 \% & 6.22 \\ \hline
-10 \% & 4.78 \\ \hline
-15 \% & 3.94 \\ \hline20 \% & 3.34 \\
-\hline\end{tabular}}
-\caption{The number of bits needed to store each k-mer for selected
-false positive rates.  These numbers are independent of the specific k
-chosen.}
-% @@CTB move out of methods
-\end{table}
 
 This graph structure is effectively {\em compressible} because one can
 choose a larger or smaller size for the underlying Bloom filters; a
@@ -188,18 +190,6 @@ remains, with no erroneous shortcuts between k-mers that are present
 in the original sequence.  It is visually apparent that even a relatively high false positive rate ($\sim$
 15\%) does not systematically and erroneously connect distant k-mers.
 
-\begin{figure}
-\includegraphics[width=3in]{figures/f3b001}
-\includegraphics[width=3in]{figures/f3b005}\\
-\includegraphics[width=3in]{figures/f3b010}
-\includegraphics[width=3in]{figures/f3b015}
-\caption{Graph visualizations demonstrating the decreasing 
-fidelity of graph structure with increasing false positive rate. From 
-top left to bottom right, the false positive rates are 0.01, 0.05, 0.10, 
-and 0.15.}
-\label{fig:circles}
-\end{figure}
-
 In addition, it is simple to see that a linear increase in the false 
 positive rate results in a linear increase in the number of expected 
 neighbors for a particular k-mer. For most isolated k-mers (i.e. no adjacent 
@@ -220,15 +210,6 @@ rapidly increases as a specific threshold is approached, which appears
 to be at a FP rate near 0.18 for k=31. Beyond 0.18, the components
 begin to join together as a single giant cluster, and small components
 are more rare.
-
-\begin{figure}
-\center{\includegraphics[width=5in]{newclust}}
-\label{fig:clustersize}
-\caption{Average cluster size versus false positive rate. The average 
-cluster size sharply increases as the false positive 
-rate approaches the percolation threshold.
-}
-\end{figure}
 
 As the false positive rate increases, we observe a sudden transition
 from many small components to erroneous connections between these
@@ -280,17 +261,6 @@ created, which lowers the diameter.  Thus, the larger scale graph
 structure is retained through $p > 0.183$, as suggested by the cluster
 size analysis and percolation results.
 
-\begin{figure}
-\label{fig:diam}
-\center{\includegraphics[width=5in]{figures/newdiam}}
-
-\caption{Length of Longest Shortest Path by False Positive Rate. The
-  length of the longest shortest path of randomly generated 58bp long
-  circular chromosomes in 8-mer space for different false positive
-  rates. Only real (non-error) k-mers are considered for starting and
-  ending points.}
-\end{figure}
-
 \subsection{Sequencing errors eclipse false positives}
 
 One important consideration for the utility of the k-mer graph
@@ -301,36 +271,11 @@ errors add to the graph complexity and make it more difficult to find
 high-quality paths for generating long, accurate contigs. Since our
 approach also generates false positives, we wanted to compare the
 error rate from the Bloom filter graph with experimental errors
-generated by sequencing (Table 2). We used the \emph{E. coli} K-12
+generated by sequencing (Table \ref{tab:ecoli}). We used the \emph{E. coli} K-12
 MG1665 genome to compare various graph invariants between an Illumina
 dataset generated from the same strain (see \emph{Methods}), an exact
 representation of the genome, and inexact representations with
 different false positive rates.
-
-Additionally, we used the linear model
-available from the Velvet mailing
-list\footnote{http://listserver.ebi.ac.uk/pipermail/velvet-users/2009-July/000474.html}
-to find that Velvet needs $\sim 876$ MB to assemble the dataset that
-we used.  This was verified computationally.
-
-\begin{table}
-\center{\begin{tabular}{ | c || c | c | c | c | c | c |}
-\hline
-Data + FPR & No. K-mers & No. Add'l & No. Missing & Deg $\ge 2$ & \% Real & Mem (bits) \\ \hline \hline
-\emph{E. coli} 0 \% & 4,530,123 & 0 & 0 & 50,605 & 100 & $1.71 \times 10^{10}$ \\ \hline
-\emph{E. coli} 1 \% & 4,814,050 & 283,927 & 0 & 313,844 & 94.1 & $4.34 \times 10^7$ \\ \hline
-\emph{E. coli} 5 \% & 6,349,301 & 1,819,178 & 0 & 1,339,102 & 71.3 & $2.82 \times 10^7$ \\ \hline
-\emph{E. coli} 15 \% & 31,109,523 & 26,579,400 & 0 & 10,522,482 & 14.6 & $1.79 \times 10^7$ \\ \hline
-Reads 0 \% & 45,566,033 & 41,036,029 & 119 & 7,700,483 & 9.9 & $1.71 \times 10^{10}$ \\ \hline
-Reads 1 \% & 48,237,038 & 43,707,032 & 117 & 9,771,028 & 9.4 & $4.37 \times 10^8$ \\ \hline
-Reads 5 \% & 62,094,757 & 57,564,749 & 115 & 18,116,934 & 7.3 & $2.84 \times 10^8$ \\ \hline
-Reads 15 \% & 235,654,877 & 231,124,854 & 100 & 85,813,621 & 1.9 & $1.8 \times 10^8$ \\
-\hline
-\end{tabular}}
-\caption{An exact \emph{E. coli} genome representation of 17-mers was compared with 
-two inexact ones as well as an exact and two inexact representations of an Illumina 
-\emph{E. coli} dataset.}
-\end{table}
 
 For these comparisons, we used a $k$ value of 17, which allows us to
 use Bloom filters with no false positives.
@@ -362,18 +307,6 @@ even with a low false positive rate of 1\%.
 \subsection{Sequences can be accurately partitioned by graph connectivity}
 
 
-\begin{figure}
-\center{\includegraphics[width=5in]{figures/newpart}}
-
-\caption{Number of Partitions by False Positive Rate. The graph shows
-  the resulting number of partitions for a simulated dataset with
-  1,000 contigs of 10,000 bp each (circles). For $n=5$ different
-  combinations of hash table sizes, there was no variation in results
-  for the simulated dataset.}
-
-\label{fig:partfp}
-\end{figure}
-
 Can we use this lightweight graph representation to find and separate
 components in de Bruijn graphs?  The diameter results suggest that
 unconnected components are unlikely to connect below the percolation
@@ -383,25 +316,6 @@ we partitioned the data across many different false positive rates,
 using the procedure described in \emph{Methods}. As predicted, the
 resulting number of partitions did not vary across the false positive
 rates while $f_p \le 0.15$ (Figure \ref{fig:partfp}).
-
-\begin{table}
-\center{\begin{tabular}{ | c | c | c | c | }
-\hline
-$f_p$ & memory use (improvement) & N partitions & D partition size\\ \hline
-1 \% & 2.0gb (16.5x) & 106,025 & 344,426 \\ \hline
-5 \% & 1.55gb (21.3x) & 217,435 & 344,426 \\ \hline
-10 \% & 1.43gb (23.1x) & 1,048,205 & 344,428 \\ \hline
-15 \% & 2.2gb (15x) & 3,495,559 & 344,784 \\ \hline
-\hline\end{tabular}}
-
-\caption{Partitioning results on a soil metagenome at k=31.  Memory
-  use is maximum memory required in gigabytes during partitioning,
-  with the given improvement ratio over using the ABySS assembler on
-  the unpartitioned data, which required 33 GB.  N partitions is the
-  total number of partitions containing more than 500 k-mers, and D is
-  the largest partition size in reads.}
-\label{table:parts}
-\end{table}
 
 We then applied partitioning to a considerably larger bulk soil
 metagenome (``MSB2'') containing 35 million 75 bp long reads generated
@@ -471,7 +385,7 @@ in memory usage over the exact representation at a false positive rate
 of 1\%.  While increased coverage and variation in data set complexity
 will affect the actual memory usage, these results demonstrate that
 significant scaling in the memory required for assembly can be achieved
-in one case.
+in at least one case.
 
 % @CTB fill in number
 
@@ -555,25 +469,14 @@ additional uses for de Bruijn graphs.
 %waypoints will take up additional memory.  Such questions remain to be
 %explored in future work.
 
-\subsection{Acknowledgements}
+\begin{materials}
 
-We thank Chris Adami, Qingpeng Zhang, Adina Howe, and Tracy Teal for
-their insights, and Jim Cole and Jordan Fish for discussion of future
-applications.  This project was supported by AFRI Competitive Grant
-no. 2010-65205-20361 from the USDA NIFA, and NSF IOS-0923812.  The
-MSB2 soil metagenome was sequenced by the DOE's Joint Genome
-Institute through the Great Lakes Bioenergy Research Center.
-
-% @@CTB mention k_0 > k_1 etc.
-
-\section{Methods}
-
-\subsection{Genome and Sequence Data}
+\section{Genome and Sequence Data}
 We used the \emph{E. coli} K-12 MG1655 genome (GenBank: U00096.2) and two MG1655 Illumina 
 datasets (Short Read Archive accessions SRX000429 and SRX000430) for E. coli
 analyses.  @@MSB2.
 
-\subsection{Data Structure Implementation}
+\section{Data Structure Implementation}
 We implemented a variation on the Bloom filter data structure to store
 k-mers in memory. In a classic Bloom filter, multiple hash functions
 map bits into a single hash table to add an object or test for the presence
@@ -595,7 +498,7 @@ time, $O(h)$ for $h$ hash tables.  Similar to other hash-style data
 structures for storing k-mers, memory usage is independent of the
 value of $k$.
 
-\subsection{Calculating Data Structure Properties}
+\section{Calculating Data Structure Properties}
 The properties of our Bloom filter variant are the
 same as a classical Bloom filter \cite{bloomsurvey}.
 To calculate the expected false positive 
@@ -621,7 +524,7 @@ tables is
 \frac{m}{n} = \frac{1}{\ln(2)} \log{\frac{1}{P_f}}.
 \end{displaymath}
 
-\subsection{Estimating False Positive Rate For Erroneous Connectivity}
+\section{Estimating False Positive Rate For Erroneous Connectivity}
 We ran a simulation to find when components in the graph 
 begin to erroneously connect to one another.
 To calculate the false positive rate $p$ at which this aberrant 
@@ -652,7 +555,7 @@ threshold binning method \cite{adami2002critical}. The critical value for
 when aberrant connectivity occurred was found by determining the local maxima 
 of the F-values \cite{wald43}.
 
-\subsection{Graph Partitioning Using A Bloom Filter}
+\section{Graph Partitioning Using A Bloom Filter}
 
 We used the Bloom filter data structure containing the k-mers from a
 dataset to discover components of the graph, i.e. to partition the
@@ -667,11 +570,15 @@ around these tags in order to connect tagged k-mers based on graph
 connectivity.  The underlying reads in each component can then be
 separated based on their partition.
 
-\subsection{Assembly}
+\section{Assembler software}
 
-We used ABySS v@@@, with the following parameters: xxx.
+We used ABySS v1.3.1 and Velvet v1.1.07 to perform assemblies (cite).
+We did not use Velvet for the partitioning analysis because Velvet has
+a stochastic component during error correction that results in
+dissimilar assemblies when read order is changed, and hence the
+assemblies cannot be easily compared.
 
-\subsection{Software and Software Availability}
+\section{Software and Software Availability}
 
 We have implemented this compressible graph representation and the associated
 partitioning algorithm in a
@@ -681,8 +588,238 @@ https://github.com/ctb/khmer.  The graphviz software package was used
 for graph visualizations. The scripts to generate the figures of this
 paper are available in the khmer repository.
 
+\end{materials}
+
+\begin{acknowledgments}
+
+We thank Chris Adami, Qingpeng Zhang, and Tracy Teal for
+their insights, and Jim Cole and Jordan Fish for discussion of future
+applications.  This project was supported by AFRI Competitive Grant
+no. 2010-65205-20361 from the USDA NIFA, and NSF IOS-0923812.  The
+MSB2 soil metagenome was sequenced by the DOE's Joint Genome
+Institute through the Great Lakes Bioenergy Research Center.
+
+\end{acknowledgments}
+
+% @@CTB mention k_0 > k_1 etc.
+
 \bibliographystyle{abbrv}
-\bibliography{kmer-percolation}
+
+\begin{thebibliography}{10}
+
+\bibitem{adami2002critical}
+C.~Adami and J.~Chu.
+\newblock {C}ritical and near-critical branching processes.
+\newblock {\em Physical Review E}, 66(1):011907, 2002.
+
+\bibitem{bloom}
+B.~Bloom.
+\newblock {{S}pace/time tradeoffs in hash coding with allowable errors}.
+\newblock {\em CACM}, 13(7):422--426, 1970.
+
+\bibitem{bondy2008graph}
+J.~Bondy and U.~Murty.
+\newblock {G}raph {T}heory.
+\newblock {\em Graduate Texts in Mathematics}, 2008.
+
+\bibitem{bloomsurvey}
+A.~Broder and M.~Mitzenmacher.
+\newblock {N}etwork applications of bloom filters: {A} survey.
+\newblock {\em Internet Mathematics}, 1(4):485--509, 2004.
+
+\bibitem{pubmed22068540}
+P.~Compeau, P.~Pevzner, and G.~Tesler.
+\newblock How to apply de bruijn graphs to genome assembly.
+\newblock {\em Nat Biotechnol}, 29(11):987--91, 2011.
+
+\bibitem{zerbinothesis}
+Z.~DR.
+\newblock Genome assembly and comparison using de bruijn graphs (phd thesis).
+\newblock 2009.
+
+\bibitem{pubmed21304727}
+J.~Gilbert, F.~Meyer, D.~Antonopoulos, P.~Balaji, C.~Brown, C.~Brown, N.~Desai,
+  J.~Eisen, D.~Evers, D.~Field, W.~Feng, D.~Huson, J.~Jansson, R.~Knight,
+  J.~Knight, E.~Kolker, K.~Konstantindis, J.~Kostka, N.~Kyrpides,
+  R.~Mackelprang, A.~McHardy, C.~Quince, J.~Raes, A.~Sczyrba, A.~Shade, and
+  R.~Stevens.
+\newblock Meeting report: the terabase metagenomics workshop and the vision of
+  an earth microbiome project.
+\newblock {\em Stand Genomic Sci}, 3(3):243--8, 2010.
+
+\bibitem{pmid21187386}
+S.~Gnerre, I.~Maccallum, D.~Przybylski, F.~J. Ribeiro, J.~N. Burton, B.~J.
+  Walker, T.~Sharpe, G.~Hall, T.~P. Shea, S.~Sykes, A.~M. Berlin, D.~Aird,
+  M.~Costello, R.~Daza, L.~Williams, R.~Nicol, A.~Gnirke, C.~Nusbaum, E.~S.
+  Lander, and D.~B. Jaffe.
+\newblock {{H}igh-quality draft assemblies of mammalian genomes from massively
+  parallel sequence data}.
+\newblock {\em Proc. Natl. Acad. Sci. U.S.A.}, 108:1513--1518, Jan 2011.
+
+\bibitem{trinity}
+M.~Grabherr, B.~Haas, M.~Yassour, J.~Levin, D.~Thompson, I.~Amit, X.~Adiconis,
+  L.~Fan, R.~Raychowdhury, Q.~Zeng, et~al.
+\newblock {F}ull-length transcriptome assembly from {R}{N}{A}-{S}eq data
+  without a reference genome.
+\newblock {\em Nature biotechnology}, 2011.
+
+\bibitem{pubmed20211242}
+J.~Miller, S.~Koren, and G.~Sutton.
+\newblock Assembly algorithms for next-generation sequencing data.
+\newblock {\em Genomics}, 95(6):315--27, 2010.
+
+\bibitem{metavelvet}
+T.~Namiki, T.~Hachiya, H.~Tanaka, and Y.~Sakakibara.
+\newblock {M}eta{V}elvet: {A}n extension of {V}elvet assembler to de novo
+  metagenome assembly from short sequence reads.
+\newblock {\em ACM Conference on Bioinformatics, Computational Biology and
+  Biomedicine}, 2011.
+
+\bibitem{pubmed21685107}
+Y.~Peng, H.~Leung, S.~Yiu, and F.~Chin.
+\newblock Meta-idba: a de novo assembler for metagenomic data.
+\newblock {\em Bioinformatics}, 27(13):i94--i101, 2011.
+
+\bibitem{price2005novo}
+A.~Price, N.~Jones, and P.~Pevzner.
+\newblock {D}e novo identification of repeat families in large genomes.
+\newblock {\em Bioinformatics}, 21(suppl 1):i351--i358, 2005.
+
+\bibitem{stauffer1979scaling}
+D.~Stauffer.
+\newblock {S}caling theory of percolation clusters.
+\newblock {\em Physics Reports}, 54(1):1--74, 1979.
+
+\bibitem{wald43}
+A.~Wald.
+\newblock Tests of statistical hypotheses concerning several parameters when
+  the number of observations is large.
+\newblock {\em Transactions of the American Mathematical Society}, 54:426--482,
+  1943.
+
+\bibitem{zhang2003dna}
+Y.~Zhang and M.~Waterman.
+\newblock {D}{N}{A} {S}equence {A}ssembly and {M}ultiple {S}equence {A}lignment
+  by an {E}ulerian {P}ath {A}pproach.
+\newblock In {\em Cold Spring Harbor Symposia on Quantitative Biology},
+  volume~68, pages 205--212. Cold Spring Harbor Laboratory Press, 2003.
+
+\end{thebibliography}
+
+\end{article}
+
+\begin{figure}
+\centering
+\includegraphics[width=5in]{bloomgraph}
+\caption{Storing k-mer graphs in Bloom filters.  Longer sequences are broken down into k-mers (here, k=6) and stored in the Bloom filter.
+The graph is traversed by starting with a k-mer and then testing all possible 1-base postfixes for presence in the Bloom filter.}
+
+\label{fig:bloomgraph}
+\end{figure}
+
+\begin{figure}
+\includegraphics[width=2.5in]{figures/f3b001}
+\includegraphics[width=2.5in]{figures/f3b005}\\
+\includegraphics[width=2.5in]{figures/f3b010}
+\includegraphics[width=2.5in]{figures/f3b015}
+\caption{Graph visualizations demonstrating the decreasing 
+fidelity of graph structure with increasing false positive rate. From 
+top left to bottom right, the false positive rates are 0.01, 0.05, 0.10, 
+and 0.15.}
+\label{fig:circles}
+\end{figure}
+
+\begin{figure}
+\center{\includegraphics[width=5in]{newclust}}
+\label{fig:clustersize}
+\caption{Average cluster size versus false positive rate. The average 
+cluster size sharply increases as the false positive 
+rate approaches the percolation threshold.
+}
+\end{figure}
+
+\begin{figure}
+\label{fig:diam}
+\center{\includegraphics[width=5in]{figures/newdiam}}
+
+\caption{Length of Longest Shortest Path by False Positive Rate. The
+  length of the longest shortest path of randomly generated 58bp long
+  circular chromosomes in 8-mer space for different false positive
+  rates. Only real (non-error) k-mers are considered for starting and
+  ending points.}
+\end{figure}
+
+\begin{figure}
+\center{\includegraphics[width=5in]{figures/newpart}}
+
+\caption{Number of Partitions by False Positive Rate. The graph shows
+  the resulting number of partitions for a simulated dataset with
+  1,000 contigs of 10,000 bp each (circles). For $n=5$ different
+  combinations of hash table sizes, there was no variation in results
+  for the simulated dataset.}
+
+\label{fig:partfp}
+\end{figure}
+
+\begin{table*}
+\centering
+\caption{Partitioning results on a soil metagenome at k=31.}
+
+% Memory
+%  use is maximum memory required in gigabytes during partitioning,
+%  with the given improvement ratio over using the ABySS assembler on
+%  the unpartitioned data, which required 33 GB.  N partitions is the
+%  total number of partitions containing more than 500 k-mers, and D is
+%  the largest partition size in reads.}
+
+\begin{tabular*}{\hsize}{@{\extracolsep{\fill}}cccc}
+False positive rate & memory use (improvement) & N partitions & D partition size \cr
+\hline
+1 \% & 2.0gb (16.5x) & 106,025 & 344,426 \cr
+5 \% & 1.55gb (21.3x) & 217,435 & 344,426 \cr
+10 \% & 1.43gb (23.1x) & 1,048,205 & 344,428 \cr
+15 \% & 2.2gb (15x) & 3,495,559 & 344,784 \cr
+\hline
+\end{tabular*}
+
+\label{table:parts}
+\end{table*}
+
+\begin{table*}
+\centering
+\caption{Bits per k-mer at each false positive rate.}
+\begin{tabular*}{\hsize}{@{\extracolsep{\fill}}cccc}
+\hline
+False positive rate & Bits/k-mer \\ \hline
+0.1 \% & 14.35 \cr
+1 \% & 9.54 \cr
+5 \% & 6.22 \cr
+10 \% & 4.78 \cr
+15 \% & 3.94 \cr
+20 \% & 3.34 \cr
+\hline\end{tabular*}
+% @@CTB move out of methods
+\end{table*}
+
+\begin{table}
+\label{tab:ecoli}
+\centering
+
+\caption{Effects of storing \emph{E. coli} data at different false positive rates}
+\begin{tabular*}{\hsize}{@{\extracolsep{\fill}}ccccccc}
+\hline
+Data + FPR & No. K-mers & No. Add'l & No. Missing & Deg $\ge 2$ & \% Real & Mem (bits) \\ \hline
+\emph{E. coli} 0 \% & 4,530,123 & 0 & 0 & 50,605 & 100 & $1.71 \times 10^{10}$ \\
+\emph{E. coli} 1 \% & 4,814,050 & 283,927 & 0 & 313,844 & 94.1 & $4.34 \times 10^7$ \\
+\emph{E. coli} 5 \% & 6,349,301 & 1,819,178 & 0 & 1,339,102 & 71.3 & $2.82 \times 10^7$ \\
+\emph{E. coli} 15 \% & 31,109,523 & 26,579,400 & 0 & 10,522,482 & 14.6 & $1.79 \times 10^7$ \\
+Reads 0 \% & 45,566,033 & 41,036,029 & 119 & 7,700,483 & 9.9 & $1.71 \times 10^{10}$ \\
+Reads 1 \% & 48,237,038 & 43,707,032 & 117 & 9,771,028 & 9.4 & $4.37 \times 10^8$ \\
+Reads 5 \% & 62,094,757 & 57,564,749 & 115 & 18,116,934 & 7.3 & $2.84 \times 10^8$ \\
+Reads 15 \% & 235,654,877 & 231,124,854 & 100 & 85,813,621 & 1.9 & $1.8 \times 10^8$ \\
+\hline
+\end{tabular*}
+\end{table}
+
+
 \end{document}
-
-
