@@ -300,10 +300,11 @@ errors demonstrated by sequencers dwarf the errors caused by the
 inexact graph representation below a reasonable false positive rate.
 
 When we assemble this data set with the Velvet and ABySS assemblers at
-k=31, we find that Velvet requires 876mb to assemble the data set,
-while ABySS requires 1.6gb.  Thus the Bloom filter approach stores
-graphs approximately 20-40x more efficiently than either program,
-even with a low false positive rate of 1\%.
+k=31, we find that Velvet requires 3.7gb to assemble the data set,
+while ABySS requires 1.6gb; this memory usage is dominated by the
+graph storage. Thus the Bloom filter approach stores graphs 40 or
+more times more efficiently than either program, even with a low false
+positive rate of 1\%.
 
 \subsection{Sequences can be accurately partitioned by graph connectivity}
 
@@ -576,10 +577,9 @@ separated based on their partition.
 We used ABySS v1.3.1 and Velvet v1.1.07 to perform assemblies (cite).
 The ABySS command was: {\tt mpirun -np 8 ABYSS-P -k31 -o contigs.fa reads.fa}.
 The Velvet commands were: {\tt velveth test 31 -fasta -short reads.fa \&\& velvetg test}.
-We did not use Velvet for the partitioning analysis because Velvet has
-a stochastic component during error correction that results in
-dissimilar assemblies when read order is changed, and hence the
-assemblies cannot be easily compared.
+We did not use Velvet for the partitioning analysis because Velvet's
+error correction algorithm is stochastic and results in dissimilar
+assemblies for different read order.
 
 \section{Software and Software Availability}
 
