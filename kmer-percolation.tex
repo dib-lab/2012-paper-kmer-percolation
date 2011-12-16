@@ -4,7 +4,7 @@
 % TODO:
 %   reference tables!!
 
-\documentclass{pnastwo}
+\documentclass[draft]{pnastwo}
 \usepackage[pdftex]{graphicx}
 \graphicspath{{figures/}}
 
@@ -142,7 +142,7 @@ required for assembly.
 
 \section{Results}
 
-\subsection{Bloom filters can store k-mer graphs}
+\subsection{Bloom filters can store de Bruijn graphs}
 
 Given a set of short DNA sequences, or reads, we first break down each
 read into a set of overlapping k-mers.  We then store each k-mer
@@ -159,15 +159,19 @@ which means that there can be no self-loops or parallel edges between
 vertices/k-mers. This graph representation is constant in its memory
 usage, so only ancillary information such as list of vertices visited
 or waypoints in the graph consumes additional memory.
-
-This graph structure is effectively {\em compressible} because one can
-choose a larger or smaller size for the underlying Bloom filters; a
-larger size admits fewer false positives, while a smaller size admits
-more. By relying on Bloom filters, the data structure is constant
+By relying on Bloom filters, the data structure is constant
 memory: no extra memory is used as additional data is added. However,
 as memory is decreased or data is increased, false positive vertices
 and edges are gained, so compressing the graph results in a more
 tightly interconnected graph.
+
+This graph structure is effectively {\em compressible} because one can
+choose a larger or smaller size for the underlying Bloom filters; a
+larger size admits fewer false positives, while a smaller size admits
+more. In exchange, we can store k-mer nodes more or less efficiently: for
+example, for a false positive rate of 15\%, at which 1 in 6 random k-mers
+tested would be falsely considered present, each k-mer can be stored
+in under 4 bits of memory (see Table \ref{table:bitskmer}).
 
 In contrast to an exact graph storage, there is a chance that a k-mer will
 be adjacent to a false positive: that is, a k-mer may connect to another k-mer that does not
@@ -187,8 +191,7 @@ breadth-first search beginning at the first 31-mer.  The graphs in
 Figure \ref{fig:circles} demonstrate how the local graph structure elaborates with the
 false positive rate while the overall circular graph structure
 remains, with no erroneous shortcuts between k-mers that are present
-in the original sequence.  It is visually apparent that even a relatively high false positive rate ($\sim$
-15\%) does not systematically and erroneously connect distant k-mers.
+in the original sequence.  It is visually apparent that even a high false positive rate of 15\% does not systematically and erroneously connect distant k-mers.
 
 In addition, it is simple to see that a linear increase in the false 
 positive rate results in a linear increase in the number of expected 
@@ -207,13 +210,12 @@ estimated the average cluster size for each false positive rate
 ($n=10000$) and used percentile bootstrap to obtain estimates within a
 95\% confidence interval. Figure \ref{fig:clustersize} demonstrates that the average cluster size
 rapidly increases as a specific threshold is approached, which appears
-to be at a FP rate near 0.18 for k=31. Beyond 0.18, the components
+to be at a false positive rate near 0.18 for k=31. Beyond 0.18, the components
 begin to join together as a single giant cluster, and small components
 are more rare.
 
 As the false positive rate increases, we observe a sudden transition
-from many small components to erroneous connections between these
-components (Figure \ref{fig:clustersize}).  In contrast to the linear increase in the
+from many small components to fewer, larger components created by erroneous connections between the ``true'' components (Figure \ref{fig:clustersize}).  In contrast to the linear increase in the
 local neighborhood structure as the false positive rate increases
 linearly, the change in global graph structure is abrupt as previously
 disconnected clusters join together.  This rapid change resembles a
@@ -223,7 +225,7 @@ considering a probability $p$ that a particular k-mer is the ``on''
 state. (This is in contrast to bond percolation where $p$ represents
 the probability of a particular edge being in the ``on'' state.) As
 long as the false positive rate is below the percolation threshold
-$p_\theta$ (in the subcritical phase), we would predict that the graph
+$p_\theta$ (i.e. in the subcritical phase), we would predict that the graph
 is not highly connected by false positives.
 
 % @CTB MENTION ITERATIVE PARTITIONING
@@ -232,13 +234,14 @@ Percolation thresholds for finite graphs can be estimated by finding
 where the cluster size distribution transitions from linear to
 quadratic in form \cite{stauffer1979scaling}.  Using the calculation
 method described in \emph{Methods}, we found the site percolation
-threshold for DNA k-mer graphs to be $p_\theta = 0.183 \pm 0.001$.
+threshold for DNA de Bruijn graphs to be $p_\theta = 0.183 \pm 0.001$.
 Although we only tested within a limited range of k from 20 to 32, the
 percolation threshold appears to be independent of different $k$.
-That is, as long as the false positive rate is below $0.183$, we
+Thus, as long as the false positive rate is below $0.183$, we
 predict that truly disconnected components in the graph are unlikely
 to connect to one another erroneously, that is, due solely to errors
 introduced by the probabilistic representation.
+%% @@do we need to demonstrate k independence anywhere?
 
 \subsection{Large-scale graph structure is retained to the percolation threshold}
 
@@ -248,13 +251,12 @@ to change below the percolation threshold. To verify this, we employed
 the diameter metric in graph theory.  The diameter of a component in a
 graph is a measure of the length of the ``longest shortest'' path
 between any two vertices\cite{bondy2008graph}.  In our case, we only
-considered paths between two real k-mers in the dataset for the only
-component that contains real k-mers.  We randomly generated 58bp long
+considered paths between two real k-mers in the dataset.  We randomly generated 58bp long
 circular chromosomes to construct components containing 50 8-mers and
 calculated the diameter at different false positive rates. At each
 false positive rate, we ran the simulation 500 times and estimated the
 mean within a 95\% confidence interval using percentile bootstrap. As Figure \ref{fig:diam} shows, erroneous
-connections between pairs of ``real'' k-mers are rare below the
+connections between pairs of real k-mers are rare below the
 percolation threshold. For false positive rates at or above the
 percolation threshold, spurious connections between real k-mers are
 created, which lowers the diameter.  Thus, the larger scale graph
@@ -263,7 +265,7 @@ size analysis and percolation results.
 
 \subsection{Sequencing errors eclipse false positives}
 
-One important consideration for the utility of the k-mer graph
+One important consideration for the utility of the de Bruijn graph
 representation is to compare it with graphs built from real data from
 massively parallel sequencers such as Illumina, which contain base
 calling errors.  In de Bruijn graph-based assemblers, these sequencing
@@ -271,7 +273,7 @@ errors add to the graph complexity and make it more difficult to find
 high-quality paths for generating long, accurate contigs. Since our
 approach also generates false positives, we wanted to compare the
 error rate from the Bloom filter graph with experimental errors
-generated by sequencing (Table \ref{ecoli}). We used the \emph{E. coli} K-12
+generated by sequencing (Table \ref{table:ecoli}). We used the \emph{E. coli} K-12
 MG1665 genome to compare various graph invariants between an Illumina
 dataset generated from the same strain (see \emph{Methods}), an exact
 representation of the genome, and inexact representations with
@@ -283,9 +285,11 @@ We found a
 total of 50,605 17-mers in the exact representation that were not part
 of a simple line, i.e. had more than two neighbors (degree $>$ 2). As
 the false positive rate increased, the number of these 17-mers
-increased in the expected linear fashion in addition to the number of
-false positive 17-mers found in each component. Furthermore, the
-number of ``real'' 17-mers, those that are not false positives,
+increased in the expected linear fashion.
+% in addition to the number of
+%false positive 17-mers found in each component.
+Furthermore, the
+number of real 17-mers, those that are not false positives,
 comprise the majority of the graph.
 
 In contrast, when we examined an exact representation of an Illumina
@@ -294,25 +298,26 @@ reference genome.  As above, we only counted false positive k-mers
 that are transitively connected to least one real k-mer. The number of
 17-mers with more than 2 neighbors is higher than for the exact
 representation of the genome, which demonstrates that sequencing
-errors add to the complexity of the graph. Thus, we find that the
+errors add to the complexity of the graph. Overall, the
 errors demonstrated by sequencers dwarf the errors caused by the
 inexact graph representation below a reasonable false positive rate.
 
 When we assemble this data set with the Velvet and ABySS assemblers at
-k=31, we find that Velvet requires 3.7gb to assemble the data set,
+k=31, Velvet requires 3.7gb to assemble the data set,
 while ABySS requires 1.6gb; this memory usage is dominated by the
-graph storage. Thus the Bloom filter approach stores graphs 40 or
+graph storage \cite{zerbinothesis}. Thus the Bloom filter approach stores graphs 40 or
 more times more efficiently than either program, even with a low false
-positive rate of 1\%.
+positive rate of 1\%.  While this is not a perfect comparison -- assemblers do more than simply store the graph! -- it does directly suggest that 
 
 \subsection{Sequences can be accurately partitioned by graph connectivity}
 
 
 Can we use this lightweight graph representation to find and separate
-components in de Bruijn graphs?  The diameter results suggest that
-unconnected components are unlikely to connect below the percolation
-threshold. To show this, we analyzed a simulated dataset of 1,000
-randomly generated contigs containing 10,000 bp each.  Using $k=31$,
+components in de Bruijn graphs?  The primary concern is that false positive
+nodes or edges would connect components, but the diameter results suggest that
+components are unlikely to connect below the percolation
+threshold. To verify this, we analyzed a simulated dataset of 1,000
+randomly generated sequences of length 10,000 bp.  Using $k=31$,
 we partitioned the data across many different false positive rates,
 using the procedure described in \emph{Methods}. As predicted, the
 resulting number of partitions did not vary across the false positive
@@ -322,14 +327,14 @@ We then applied partitioning to a considerably larger bulk soil
 metagenome (``MSB2'') containing 35 million 75 bp long reads generated
 from an Illumina GAII sequencer.  We calculated the number of unique
 31-mers present in the data set to be 1.35 billion. Then, for each of
-several false positive rates (see table \ref{table:parts}) we loaded
+several false positive rates (see Table \ref{table:parts}) we loaded
 the reads into a graph, eliminated components containing fewer than
 500 unique k-mers, and partitioned the reads into separate files based
 on graph connectivity.
 
 Once we obtained the partition sets, we individually assembled each
-set of partitions, as well as the entire (unpartitioned) data set, and
-retained contigs longer than 500 bp.  The resulting assemblies were
+set of partitions, as well as the entire (unpartitioned) data set,
+retaining contigs longer than 500 bp.  The resulting assemblies were
 all identical, containing 1,444 contigs with a total assembled
 sequence of 1.07 mb.  The unpartitioned data set required 33 GB to
 assemble with ABySS, while the partitioned data sets all required
@@ -350,32 +355,29 @@ rate can be tuned based on hash table occupancy, yielding a wide range
 of possible storage efficiencies.
 
 Even for low false positive rates such as 5\%, this is still an
-efficient graph representation, with an observed 20-fold improvement
-in memory usage over one existing assembler, Velvet.  The false
+efficient graph representation, with a greater than 20-fold improvement
+in memory usage over two existing assemblers, Velvet and ABySS.  The false
 positive rates have a small effect on branching graph structure
 compared to sequencing errors, suggesting that this is an effective
-practical representation.  It is worth noting that the false positives
+practical representation for de Bruijn graphs.  In addition, the false positives
 engendered by the Bloom filters are uncorrelated with the original
 sequence, unlike sequencing errors which usually have a low edit
-distance to the real sequence; this may further reduce the effect of
+distance to the real sequence.  This feature may further reduce the effect of
 false positives on de Bruijn graph analysis, depending on the specific
 application.
 
 \subsection{Preservation of long-range structure permits graph partitioning}
 
 Using a probabilistic graph representation with false positive nodes
-and edges raises the spectre of systematic graph artifacts resulting
-from the false positives.  For partitioning, one concern is that false
+and edges raises the specter of systematic graph artifacts resulting
+from the false positives.  For partitioning, the primary concern is that false
 positives will incorrectly connect components, rendering partitioning
 ineffective.  Our results from percolation analysis, diameter
-calculations, and partitioning of simulated data demonstrate that
+calculations, and partitioning of simulated and real data demonstrate that
 below the calculated percolation threshold this is not a significant
 problem.  As long as the expected rate of false edges is sufficiently
 low, long false paths are not spontaneously created and hence the
-large scale graph properties do not change.  Combined with the scaling
-properties of the graph representation, partitioning offers a way to
-efficiently apply a ``divide and conquer'' strategy to certain
-assembly problems.
+large scale graph properties do not change.
 
 Our partitioning results on a real metagenome, the MSB2 data set,
 demonstrate the utility of partitioning for reducing memory usage.
@@ -387,6 +389,17 @@ of 1\%.  While increased coverage and variation in data set complexity
 will affect the actual memory usage, these results demonstrate that
 significant scaling in the memory required for assembly can be achieved
 in at least one case.
+
+The memory requirements for the partitioning process for the MSB2 data
+set are dominated by the memory required to store and explore the
+graph.  In particular, the memory requirements for downstream assembly
+of partitions is driven by the size of the largest partition, which
+here is very small (345,000 reads; Table \ref{table:parts}).  The
+dominant partition size is remarkably refractory to the graph's false
+positive rate, increasing by far less than 1\% for a 15-fold increase
+in false positive rate; this suggests that our theoretical and
+simulated results for cluster size and diameter apply to this data set
+as well.
 
 % @CTB fill in number
 
@@ -402,6 +415,14 @@ rely on exact graph representations that are more memory intensive
 than the one presented here.  The utility of the probabilistic graph
 representation for partitioning rests on its significantly lower
 memory usage.
+
+Combined with the scaling
+properties of the graph representation, partitioning with this probabilistic
+de Bruijn graph representation offers a way to
+efficiently apply a ``divide and conquer'' strategy to certain
+assembly problems.  While this work focuses on theoretical properties
+of the graph representation, the next step will be to evaluate the approach
+on many real data sets.
 
 \subsection{Concluding thoughts}
 
@@ -438,16 +459,16 @@ structure can be monitored as data is inserted and directly converted
 to an expected false positive rate.  Third, the memory usage is
 independent of the k-mer size chosen, making this representation
 convenient for exploring properties at many different parameters.  It
-also allows the storage and traversal of k-mer graphs at multiple
+also allows the storage and traversal of de Bruijn graphs at multiple
 k-mer sizes within a single structure, although we have not yet
 explored these properties.
 
 Our initial motivation for developing this use of Bloom filters was to
 explore partitioning as an approach to scaling metagenome assembly,
 but there are many additional uses beyond metagenomics.  Partitioning
-has been applied to mRNAseq assembly as well, so this may also be
+has been applied to mRNAseq assembly as well, so this graph representation also be
 useful for scaling transcriptome assembly \cite{trinity}.  In general
-a more memory efficient de Bruijn graph representation may open up
+a more memory efficient de Bruijn graph representation could open up
 many opportunities.  While de Bruijn graph approaches are currently
 being used primarily for the purposes of assembly, they are a broadly
 useful formalism for sequence analysis. In particular, they have been
@@ -595,7 +616,7 @@ paper are available in the khmer repository.
 \begin{acknowledgments}
 
 We thank Chris Adami, Qingpeng Zhang, and Tracy Teal for
-their insights, and Jim Cole and Jordan Fish for discussion of future
+thoughtful comments, and Jim Cole and Jordan Fish for discussion of future
 applications.  This project was supported by AFRI Competitive Grant
 no. 2010-65205-20361 from the USDA NIFA, and NSF IOS-0923812.  The
 MSB2 soil metagenome was sequenced by the DOE's Joint Genome
@@ -713,7 +734,7 @@ Y.~Zhang and M.~Waterman.
 \begin{figure}
 \centering
 \includegraphics[width=5in]{bloomgraph}
-\caption{Storing k-mer graphs in Bloom filters.  Longer sequences are broken down into k-mers (here, k=6) and stored in the Bloom filter.
+\caption{Storing de Bruijn graphs in Bloom filters.  Longer sequences are broken down into k-mers (here, k=6) and stored in the Bloom filter.
 The graph is traversed by starting with a k-mer and then testing all possible 1-base pre- and post-fixes for presence in the Bloom filter.}
 
 \label{fig:bloomgraph}
@@ -733,15 +754,14 @@ and 0.15.}
 
 \begin{figure}
 \center{\includegraphics[width=5in]{newclust}}
-\label{fig:clustersize}
 \caption{Average cluster size versus false positive rate. The average 
 cluster size sharply increases as the false positive 
 rate approaches the percolation threshold.
 }
+\label{fig:clustersize}
 \end{figure}
 
 \begin{figure}
-\label{fig:diam}
 \center{\includegraphics[width=5in]{figures/newdiam}}
 
 \caption{Length of Longest Shortest Path by False Positive Rate. The
@@ -749,6 +769,7 @@ rate approaches the percolation threshold.
   circular chromosomes in 8-mer space for different false positive
   rates. Only real (non-error) k-mers are considered for starting and
   ending points.}
+\label{fig:diam}
 \end{figure}
 
 \begin{figure}
@@ -763,10 +784,6 @@ rate approaches the percolation threshold.
 \label{fig:partfp}
 \end{figure}
 
-\begin{table*}
-\centering
-\caption{Partitioning results on a soil metagenome at k=31.}
-
 % Memory
 %  use is maximum memory required in gigabytes during partitioning,
 %  with the given improvement ratio over using the ABySS assembler on
@@ -774,22 +791,9 @@ rate approaches the percolation threshold.
 %  total number of partitions containing more than 500 k-mers, and D is
 %  the largest partition size in reads.}
 
-\begin{tabular*}{\hsize}{@{\extracolsep{\fill}}cccc}
-False positive rate & Total memory use (improvement) & N partitions & D partition size \cr
-\hline
-1 \% & 2.0gb (16.5x) & 106,025 & 344,426 \cr
-5 \% & 1.55gb (21.3x) & 217,435 & 344,426 \cr
-10 \% & 1.43gb (23.1x) & 1,048,205 & 344,428 \cr
-15 \% & 2.2gb (15x) & 3,495,559 & 344,784 \cr
-\hline
-\end{tabular*}
-
-\label{table:parts}
-\end{table*}
-
 \begin{table*}
 \centering
-\caption{Bits per k-mer at each false positive rate.}
+\caption{Bits per k-mer for various false positive rates.}
 \begin{tabular*}{\hsize}{@{\extracolsep{\fill}}cccc}
 \hline
 False positive rate & Bits/k-mer \\ \hline
@@ -800,28 +804,49 @@ False positive rate & Bits/k-mer \\ \hline
 15 \% & 3.94 \cr
 20 \% & 3.34 \cr
 \hline\end{tabular*}
-% @@CTB move out of methods
+\label{table:bitskmer}
 \end{table*}
 
 \begin{table}
-\label{ecoli}
 \centering
 
-\caption{Effects of storing \emph{E. coli} data at different false positive rates}
+\caption{Effects of loading \emph{E. coli} data at different false positive rates}
 \begin{tabular*}{\hsize}{@{\extracolsep{\fill}}ccccccc}
 \hline
-Data + FPR & No. K-mers & No. Add'l & No. Missing & Deg $\ge 2$ & \% Real & Mem (bits) \\ \hline
-\emph{E. coli} 0 \% & 4,530,123 & 0 & 0 & 50,605 & 100 & $1.71 \times 10^{10}$ \\
-\emph{E. coli} 1 \% & 4,814,050 & 283,927 & 0 & 313,844 & 94.1 & $4.34 \times 10^7$ \\
-\emph{E. coli} 5 \% & 6,349,301 & 1,819,178 & 0 & 1,339,102 & 71.3 & $2.82 \times 10^7$ \\
-\emph{E. coli} 15 \% & 31,109,523 & 26,579,400 & 0 & 10,522,482 & 14.6 & $1.79 \times 10^7$ \\
-Reads 0 \% & 45,566,033 & 41,036,029 & 119 & 7,700,483 & 9.9 & $1.71 \times 10^{10}$ \\
-Reads 1 \% & 48,237,038 & 43,707,032 & 117 & 9,771,028 & 9.4 & $4.37 \times 10^8$ \\
-Reads 5 \% & 62,094,757 & 57,564,749 & 115 & 18,116,934 & 7.3 & $2.84 \times 10^8$ \\
-Reads 15 \% & 235,654,877 & 231,124,854 & 100 & 85,813,621 & 1.9 & $1.8 \times 10^8$ \\
+Graph & Total k-mers & False k-mers & Deg $\ge 2$ & \% Real & Mem (bits) \\ \hline
+\emph{E. coli} at 0\% & 4,530,123 & 0 & 50,605 & 100 & $1.71 \times 10^{10}$ \\
+\emph{E. coli} at 1\% & 4,814,050 & 283,927 & 313,844 & 94.1 & $4.34 \times 10^7$ \\
+\emph{E. coli} at 5\% & 6,349,301 & 1,819,178 & 1,339,102 & 71.3 & $2.82 \times 10^7$ \\
+\emph{E. coli} at 15\% & 31,109,523 & 26,579,400 & 10,522,482 & 14.6 & $1.79 \times 10^7$ \\
+Reads at 0\% & 45,566,033 & 41,036,029 & 7,700,483 & 9.9 & $1.71 \times 10^{10}$ \\
+Reads at 1\% & 48,237,038 & 43,707,032 & 9,771,028 & 9.4 & $4.37 \times 10^8$ \\
+Reads at 5\% & 62,094,757 & 57,564,749 & 18,116,934 & 7.3 & $2.84 \times 10^8$ \\
+Reads at 15\% & 235,654,877 & 231,124,854 & 85,813,621 & 1.9 & $1.8 \times 10^8$ \\
 \hline
 \end{tabular*}
+\label{table:ecoli}
 \end{table}
 
+\begin{table*}
+\centering
+\caption{Partitioning results on a soil metagenome at k=31.}
+
+\begin{tabular*}{\hsize}{@{\extracolsep{\fill}}cccc}
+False positive rate & Total memory use (improvement) & Largest partition size in reads \cr
+\hline
+1\% & 2.0gb (16.5x) & 344,426 \cr
+5\% & 1.55gb (21.3x) & 344,426 \cr
+10\% & 1.43gb (23.1x) & 344,428 \cr
+15\% & 2.2gb (15x) & 344,784 \cr
+\hline
+\end{tabular*}
+
+\label{table:parts}
+\end{table*}
+
+%% @@effects of local graph elaboration on partitioning/traversal alg?
+%% @@graphsize filtering vs partitioning?
+%% @@change mem/bits to mem/bytes.
+%% @@go back and refer to tables and figures in discussion, too.
 
 \end{document}
