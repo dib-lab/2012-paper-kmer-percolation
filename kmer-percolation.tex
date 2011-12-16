@@ -120,7 +120,8 @@ positives -- k-mers marked as present that do not actually exist --
 but not false negatives.  We show that this probabilistic graph
 representation can be used to efficiently store and traverse DNA de
 Bruijn graphs with an approximately 20-fold decrease in memory usage
-over the Velvet and ABySS assemblers. We relate changes in local and
+over the Velvet\cite{velvet} and ABySS\cite{abyss} assemblers. We relate 
+changes in local and
 global graph connectivity to the false positive rate of the underlying
 Bloom filters, and show that the graph's global structure is accurate
 until an abrupt transition in false connectivity near a false positive
@@ -594,7 +595,7 @@ separated based on their partition.
 
 \section{Assembler software}
 
-We used ABySS v1.3.1 and Velvet v1.1.07 to perform assemblies (cite).
+We used ABySS v1.3.1 and Velvet v1.1.07 to perform assemblies.
 The ABySS command was: {\tt mpirun -np 8 ABYSS-P -k31 -o contigs.fa reads.fa}.
 The Velvet commands were: {\tt velveth test 31 -fasta -short reads.fa \&\& velvetg test}.
 We did not use Velvet for the partitioning analysis because Velvet's
@@ -630,6 +631,11 @@ Institute through the Great Lakes Bioenergy Research Center.
 
 \begin{thebibliography}{10}
 
+\bibitem{abyss}
+J.~T. Simpson, K.~Wong, S.~D. Jackman, J.~E. Schein, S.~J. Jones, I.~Birol.
+\newblock {{A}{B}y{S}{S}: a parallel assembler for short read sequence data}.
+\newblock {\em Genome Res.}, 19(6):1117-23, 2009.
+
 \bibitem{adami2002critical}
 C.~Adami and J.~Chu.
 \newblock {C}ritical and near-critical branching processes.
@@ -652,13 +658,13 @@ A.~Broder and M.~Mitzenmacher.
 
 \bibitem{pubmed22068540}
 P.~Compeau, P.~Pevzner, and G.~Tesler.
-\newblock How to apply de bruijn graphs to genome assembly.
+\newblock How to apply de {B}ruijn graphs to genome assembly.
 \newblock {\em Nat Biotechnol}, 29(11):987--91, 2011.
 
 \bibitem{zerbinothesis}
 Z.~DR.
-\newblock Genome assembly and comparison using de bruijn graphs (phd thesis).
-\newblock 2009.
+\newblock Genome assembly and comparison using de {B}ruijn graphs.
+\newblock Ph.D. thesis, University of Cambridge, 2009.
 
 \bibitem{pubmed21304727}
 J.~Gilbert, F.~Meyer, D.~Antonopoulos, P.~Balaji, C.~Brown, C.~Brown, N.~Desai,
@@ -700,7 +706,7 @@ T.~Namiki, T.~Hachiya, H.~Tanaka, and Y.~Sakakibara.
 
 \bibitem{pubmed21685107}
 Y.~Peng, H.~Leung, S.~Yiu, and F.~Chin.
-\newblock Meta-idba: a de novo assembler for metagenomic data.
+\newblock Meta-IDBA: a de Novo assembler for metagenomic data.
 \newblock {\em Bioinformatics}, 27(13):i94--i101, 2011.
 
 \bibitem{price2005novo}
@@ -712,6 +718,11 @@ A.~Price, N.~Jones, and P.~Pevzner.
 D.~Stauffer.
 \newblock {S}caling theory of percolation clusters.
 \newblock {\em Physics Reports}, 54(1):1--74, 1979.
+
+\bibitem{velvet}
+D.~R. Zerbino, E.~Birney.
+\newblock {{V}elvet: algorithms for de novo short read assembly using de {B}ruijn graphs}.
+\newblock {\em Genome Res.}, 18(5):821-9, 2008.
 
 \bibitem{wald43}
 A.~Wald.
@@ -813,15 +824,15 @@ False positive rate & Bits/k-mer \\ \hline
 \caption{Effects of loading \emph{E. coli} data at different false positive rates}
 \begin{tabular*}{\hsize}{@{\extracolsep{\fill}}ccccccc}
 \hline
-Graph & Total k-mers & False k-mers & Deg $\ge 2$ & \% Real & Mem (bits) \\ \hline
-\emph{E. coli} at 0\% & 4,530,123 & 0 & 50,605 & 100 & $1.71 \times 10^{10}$ \\
-\emph{E. coli} at 1\% & 4,814,050 & 283,927 & 313,844 & 94.1 & $4.34 \times 10^7$ \\
-\emph{E. coli} at 5\% & 6,349,301 & 1,819,178 & 1,339,102 & 71.3 & $2.82 \times 10^7$ \\
-\emph{E. coli} at 15\% & 31,109,523 & 26,579,400 & 10,522,482 & 14.6 & $1.79 \times 10^7$ \\
-Reads at 0\% & 45,566,033 & 41,036,029 & 7,700,483 & 9.9 & $1.71 \times 10^{10}$ \\
-Reads at 1\% & 48,237,038 & 43,707,032 & 9,771,028 & 9.4 & $4.37 \times 10^8$ \\
-Reads at 5\% & 62,094,757 & 57,564,749 & 18,116,934 & 7.3 & $2.84 \times 10^8$ \\
-Reads at 15\% & 235,654,877 & 231,124,854 & 85,813,621 & 1.9 & $1.8 \times 10^8$ \\
+Graph & Total k-mers & False k-mers & \% Real & Deg $\ge 2$ & Mem (bytes) \\ \hline
+\emph{E. coli} at 0\% & 4,530,123 & 0 & 100 & 50,605 & $2.1 \times 10^{9}$ \\
+\emph{E. coli} at 1\% & 4,814,050 & 283,927 & 94.1 & 313,844 & $5.4 \times 10^6$ \\
+\emph{E. coli} at 5\% & 6,349,301 & 1,819,178 & 71.3 & 1,339,102 & $3.5 \times 10^6$ \\
+\emph{E. coli} at 15\% & 31,109,523 & 26,579,400 & 14.6 & 10,522,482 & $2.2 \times 10^6$ \\
+Reads at 0\% & 45,566,033 & 41,036,029 & 9.9 & 7,700,483 & $2.1 \times 10^{9}$ \\
+Reads at 1\% & 48,237,038 & 43,707,032 & 9.4 & 9,771,028 & $5.4 \times 10^7$ \\
+Reads at 5\% & 62,094,757 & 57,564,749 & 7.3 & 18,116,934 & $3.6 \times 10^7$ \\
+Reads at 15\% & 235,654,877 & 231,124,854 & 1.9 & 85,813,621 & $2.3 \times 10^7$ \\
 \hline
 \end{tabular*}
 \label{table:ecoli}
