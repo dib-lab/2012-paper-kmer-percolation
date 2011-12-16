@@ -4,7 +4,7 @@
 % TODO:
 %   reference tables!!
 
-\documentclass[draft]{pnastwo}
+\documentclass{pnastwo}
 \usepackage[pdftex]{graphicx}
 \graphicspath{{figures/}}
 
@@ -382,7 +382,7 @@ large scale graph properties do not change.
 Our partitioning results on a real metagenome, the MSB2 data set,
 demonstrate the utility of partitioning for reducing memory usage.
 For this specific data set, we obtained {\em identical} results with a
-20-40x decrease in memory.  This is consonant with our results from
+20-40x decrease in memory (Table \ref{table:parts}).  This is consonant with our results from
 storing the E. coli genome, in which we achieved a 20-fold decrease
 in memory usage over the exact representation at a false positive rate
 of 1\%.  While increased coverage and variation in data set complexity
@@ -392,13 +392,15 @@ in at least one case.
 
 The memory requirements for the partitioning process for the MSB2 data
 set are dominated by the memory required to store and explore the
-graph.  In particular, the memory requirements for downstream assembly
+graph; the higher memory usage for partitioning at a false positive rate
+of 15\% is due to the increase in component size from local false
+positives.  In particular, the memory requirements for downstream assembly
 of partitions is driven by the size of the largest partition, which
 here is very small (345,000 reads; Table \ref{table:parts}).  The
 dominant partition size is remarkably refractory to the graph's false
 positive rate, increasing by far less than 1\% for a 15-fold increase
-in false positive rate; this suggests that our theoretical and
-simulated results for cluster size and diameter apply to this data set
+in false positives; this shows that our theoretical and
+simulated results for cluster size and diameter apply to the MSB2 data set
 as well.
 
 % @CTB fill in number
