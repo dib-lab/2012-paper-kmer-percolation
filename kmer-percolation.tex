@@ -67,10 +67,10 @@ De novo assembly of shotgun sequencing reads into longer contiguous
 sequences plays an important role in virtually all genomic research.
 However, current computational methods for sequence assembly do not
 scale well to the volume of sequencing data now readily available from
-next-generation sequencing machines.  In particular, the deep
+next-generation sequencing machines \cite{pubmed22147368}.  In particular, the deep
 sequencing required to sample complex microbial environments easily
 results in data sets that surpass the working memory of available
-computers.
+computers \cite{metahit,rumen}.
 
 Shotgun sequencing produces hundreds of millions or billions of short
 sequences that are randomly read from the sample, and assembly of
@@ -78,49 +78,49 @@ these short sequences into longer, non-redundant sequences is
 critically important for gene content analysis.  The process of
 sequence assembly relies upon overlap analysis between many short
 sequences, and efficient overlap analysis in turn requires a
-substantial amount of working memory in order to store these overlaps.
+substantial amount of working memory in order to store these overlaps,
+which limits many assembly packages \cite{pubmed22147368}.
 
-Assembly of short reads is particularly important for the sequencing
+Assembly of these short reads is particularly important for the sequencing
 and analysis of complex microbial ecosystems, which can contain
-thousands and even millions of individual microbial species.  These
+thousands and even millions of different microbial species \cite{pubmed16123304}.  These
 ecosystems mediate important biogeochemical processes but are still
 poorly understood at a molecular level, in large part because they
 consist of many microbes that cannot be cultured or studied
 individually in the lab.  Ensemble sequencing (``metagenomics'') of
 these complex environments is one of the few ways to render them
 accessible, and has resulted in substantial early progress in
-understanding the composition and function of the human gut, cow
-rumen, and permafrost soil.  However, as sequencing capacity grows,
+understanding the composition and function of the ocean, human gut, cow
+rumen, and permafrost soil \cite{sargasso,metahit,rumen,permafrost}.  However, as sequencing capacity grows,
 the assembly of sequences from these complex samples has become
-increasingly computationally challenging.  Current methods for assembly rely on
+increasingly computationally challenging.  Current methods for short-read assembly rely on
 inexact data reduction in which reads from low-abundance organisms are
-discarded, biasing our analysis towards high-abundance organisms.
-
-% @@ newbler fix
-% @@ cite jansson paper
+discarded, biasing analyses towards high-abundance organisms \cite{metahit,rumen,permafrost}.
 
 The predominant assembly formalism applied to short-read sequencing
-data sets is a de Bruijn graph \cite{pubmed20211242,pubmed22068540}.
+data sets is a de Bruijn graph \cite{pubmed11504945,pubmed20211242,pubmed22068540}.
 In a de Bruijn graph approach, sequencing reads are decomposed into
 fixed-length words, or k-mers, and used to build a connectivity graph.
 This graph is then traversed to determine contiguous sequences
 \cite{pubmed22068540}.  Because de Bruijn graphs store only k-mers,
 memory usage scales with the number of unique k-mers in the data set
 rather than the number of reads.  Thus human genomes can be assembled
-with as little as 512 GB of system memory \cite{pmid21187386}.  For more
+with as little as 512gb of system memory \cite{pmid21187386}.  For more
 complex samples such as soil metagenomes, which may possess millions
 or more species, terabytes of memory would be required to store the graph
-\cite{pubmed21304727}.
+\cite{pubmed21304727}.  Moreover, the wide variation in species abundance
+limits the utility of standard memory-reduction practices such as
+abundance-based error-correction \cite{pubmed21114842}.
 
 In this work, we describe a simple probabilistic representation for
 storing de Bruijn graphs in memory, based on Bloom filters
 \cite{bloom}.  Bloom filters are constant-memory probabilistic data
-structures for storing sets; essentially hash tables without collision
+structures for storing sparse sets; essentially hash tables without collision
 detection, set membership queries on Bloom filters can yield false
-positives -- k-mers marked as present that do not actually exist --
+positives -- elements marked as present that do not actually exist --
 but not false negatives.  We show that this probabilistic graph
 representation can be used to efficiently store and traverse DNA de
-Bruijn graphs with an approximately 20-fold decrease in memory usage
+Bruijn graphs with a greater than 30-fold decrease in memory usage
 over two common de Bruijn graph-based assemblers, Velvet
 and ABySS~\cite{velvet,abyss}. We relate 
 changes in local and
@@ -130,16 +130,21 @@ until an abrupt transition in false connectivity near a false positive
 rate of 0.183, corresponding to a lower memory limit of approximately
 4 bits per graph node.
 
-We also show that this graph representation can be used to accurately
-assemble a soil metagenome in substantially reduced memory, through
-the use of partitioning.  Partitioning is an approach in which the de
-Bruijn graph is divided up into components, and in the past it has
-been used to improve the quality of transcriptome and metagenome assemblies,
-but not to scale the assembly process itself.
-\cite{trinity, metavelvet,pubmed21685107}.  By applying the
+We also apply this graph representation to the reduce the memory needed
+to assemble a soil metagenome sample, through
+the use of read partitioning.  Partitioning divides a de Bruijn graph up
+into disconnected graph components; these components can then be used to
+subdivide sequencing reads into disconnected subsets that can be
+assembled separately.
+This exploits a convenient biological
+feature of metagenomic samples: they contain many microbes that should
+not assemble together.  Graph partitioning has
+been used to improve the quality of metagenome and transcriptome assemblies
+by adapting assembly parameters to local coverage of the graph~\cite{metavelvet,pubmed21685107,trinity}.  However, to our knowledge, partitioning has not been applied
+to scaling metagenome assembly. By applying the
 probabilistic de Bruijn graph representation to the problem of
-partitioning, we can achieve a dramatic decrease in the memory
-required for assembly.
+partitioning, we achieve a dramatic decrease in the memory
+required for assembly of a soil metagenome.
 
 % @@ exact/inexact data influence
 
@@ -149,14 +154,14 @@ required for assembly.
 
 Given a set of short DNA sequences, or reads, we first break down each
 read into a set of overlapping k-mers.  We then store each k-mer in a
-Bloom filter, a probabilistic data structure for storing sparse data
+Bloom filter, a probabilistic data structure for storing elements from sparse data
 sets (see \emph{Methods} for implementation details).  Each k-mer
 serves as a vertex in a graph, with an edge between two vertices $N_1$
 and $N_2$ if and only if $N_1$ and $N_2$ share a (k-1)-mer that is a
 prefix of $N_1$ and a postfix of $N_2$, or vice versa (see Figure
 \ref{fig:bloomgraph}).  This edge is not stored explicitly.
 
-Thus each k-mer has up to 8 edges to 8 neighbors, which can be determined by
+Thus each k-mer has up to 8 edges connecting to 8 neighbors, which can be determined by
 simply building all possible 1-base extensions and testing for their
 presence in the Bloom filter.  In doing so, we implicitly treat the
 graph as a simple graph as opposed to a multigraph or digraph, which
@@ -176,8 +181,9 @@ which 1 in 6 random k-mers tested would be falsely considered present,
 each real k-mer can be stored in under 4 bits of memory (see
 Table~\ref{table:bitskmer}).
 
-In contrast to an exact graph storage, there is a chance that a k-mer
-will be adjacent to a false positive k-mer: that is, a k-mer may
+Using a probabilistic data structure to store k-mer nodes does
+cause one potential problem: in contrast to an exact graph storage, there is a chance that a k-mer
+will be adjacent to a false positive k-mer.  That is, a k-mer may
 connect to another k-mer that does not actually exist in the original
 dataset but nonetheless registers as present, due to the probabilistic
 nature of the Bloom filter.  As the memory per real k-mer is
@@ -215,15 +221,14 @@ To explore the point at which our data structure systematically
 engenders false long-range connections, we inserted random k-mers
 into Bloom filters with increasing false positive rates.  These k-mers
 connect to other k-mers to form graph components that increase
-in size as the false positive rate increase.
+in size with the false positive rate.
 We then
 calculated the average component size in the graph for each false positive rate
 ($n=10000$) and used percentile bootstrap to obtain estimates within a
 95\% confidence interval. Figure \ref{fig:clustersize} demonstrates that the average component size
 rapidly increases as a specific threshold is approached, which appears
 to be at a false positive rate near 0.18 for k=31. Beyond 0.18, the components
-begin to join together as a single giant component, and small components
-are more rare.
+begin to join together into larger components.
 
 As the false positive rate increases, we observe a sudden transition
 from many small components to fewer, larger components created by erroneous connections between the ``true'' components (Figure \ref{fig:clustersize}).  In contrast to the linear increase in the
@@ -231,10 +236,9 @@ local neighborhood structure as the false positive rate increases
 linearly, the change in global graph structure is abrupt as previously
 disconnected components join together.  This rapid change resembles a
 geometric phase transition, which for graphs can be discussed in terms of
-percolation theory (@@cite Stauffer). We can map our problem to site percolation by
-considering a probability $p$ that a particular k-mer is the ``on''
-state. (This is in contrast to bond percolation where $p$ represents
-the probability of a particular edge being in the ``on'' state.) As
+percolation theory~\cite{staufferintro}. We can map our problem to site percolation by
+considering a probability $p$ that a particular k-mer is present, or ``on''. (This is in contrast to bond percolation where $p$ represents
+the probability of a particular edge being present.) As
 long as the false positive rate is below the percolation threshold
 $p_\theta$ (i.e. in the subcritical phase), we would predict that the graph
 is not highly connected by false positives.
@@ -251,7 +255,7 @@ percolation threshold appears to be independent of different $k$ (see
 Figure~S1).
 Thus, as long as the false positive rate is below $0.183$, we
 predict that truly disconnected components in the graph are unlikely
-to connect to one another erroneously, that is, due solely to errors
+to connect to one another erroneously, that is, due to errors
 introduced by the probabilistic representation.
 %% @@do we need to demonstrate k independence anywhere? => S1
 
@@ -327,9 +331,9 @@ inexact graph representation below a reasonable false positive rate.
 When we assemble this data set with the Velvet and ABySS assemblers at
 k=31, Velvet requires 3.7gb to assemble the data set,
 while ABySS requires 1.6gb; this memory usage is dominated by the
-graph storage \cite{zerbinothesis}. Thus the Bloom filter approach stores graphs 40 or
+graph storage \cite{zerbinothesis}. Thus the Bloom filter approach stores graphs 30 or
 more times more efficiently than either program, even with a low false
-positive rate of 1\%.  While this is not a perfectly fair comparison -- assemblers do more than simply store the graph! -- it does directly suggest that there are opportunities for improving memory usage.
+positive rate of 1\%.  While this direct comparison can not be made fairly -- assemblers store the graph as well as k-mer abundances and other information -- it does suggest that there are opportunities for improving memory usage.
 
 \subsection{Sequences can be accurately partitioned by graph connectivity}
 
@@ -358,9 +362,9 @@ Once we obtained the partition sets, we individually assembled each
 set of partitions, as well as the entire (unpartitioned) data set,
 retaining contigs longer than 500 bp.  The resulting assemblies were
 all identical, containing 1,444 contigs with a total assembled
-sequence of 1.07 mb.  The unpartitioned data set required 33 GB to
+sequence of 1.07 megabases.  The unpartitioned data set required 33gb to
 assemble with ABySS, while the partitioned data sets all required
-under 1.5 GB to partition and assemble -- a decrease in over 20x
+under 1.5gb to partition and assemble -- a decrease in over 20x
 in memory usage for an identical result.
 
 % @CTB repartitioning
@@ -371,13 +375,13 @@ in memory usage for an identical result.
 
 \subsection{Bloom filters can be used to efficiently store de Bruijn graphs}
 
-The use of Bloom filters to store an implicit de Bruijn graph is
+The use of Bloom filters to store a de Bruijn graph is
 straightforward and memory efficient.  The expected false positive
-rate can be tuned based on Bloom filter occupancy, yielding a wide range
-of possible storage efficiencies.
+rate can be tuned based on desired memory usage,
+yielding a wide range of possible storage efficiencies.
 
-Even for low false positive rates such as 5\%, this is still an
-efficient graph representation, with a greater than 20-fold
+Even for low false positive rates such as 1\%, this is still an
+efficient graph representation, with a greater than 30-fold
 improvement in memory usage over two existing assemblers, Velvet and
 ABySS.  We can store k-mers in this data structure with a much smaller
 set of ``erroneous'' k-mers than those generated by sequencing errors,
@@ -398,28 +402,29 @@ positives will incorrectly connect components, rendering partitioning
 ineffective.  Our results from percolation analysis, diameter
 calculations, and partitioning of simulated and real data demonstrate that
 below the calculated percolation threshold this is not a significant
-problem.  As long as the expected rate of false edges is sufficiently
-low, long false paths are not spontaneously created and hence the
+problem.  As long as the false positive rate is below 18.3\%,
+long false paths are not spontaneously created and the
 large scale graph properties do not change.
 
-Our partitioning results on a real metagenome, the MSB2 data set,
+Our partitioning results on a real soil metagenome, the MSB2 data set,
 demonstrate the utility of partitioning for reducing memory usage.
 For this specific data set, we obtained {\em identical} results with a
 20-40x decrease in memory (Table \ref{table:parts}).  This is consonant with our results from
-storing the E. coli genome, in which we achieved a 20-fold decrease
+storing the E. coli genome, in which we achieved a 30-fold decrease
 in memory usage over the exact representation at a false positive rate
 of 1\%.  While increased coverage and variation in data set complexity
-will affect the actual memory usage, these results demonstrate that
+will affect actual memory usage for other data sets, these results demonstrate that
 significant scaling in the memory required for assembly can be achieved
 in at least one real case.
 
-The memory requirements for the partitioning process for the MSB2 data
+The memory requirements for the partitioning process on the MSB2 data
 set are dominated by the memory required to store and explore the
-graph; the higher memory usage for partitioning at a false positive rate
+graph; the higher memory usage observed for partitioning at a false positive rate
 of 15\% is due to the increase in component size from local false
-positives.  In particular, the memory requirements for downstream assembly
+positives.  Regardless, the memory requirements for downstream assembly
 of partitions is driven by the size of the largest partition, which
-here is very small (345,000 reads; Table \ref{table:parts}).  The
+here is very small (345,000 reads; Table \ref{table:parts}) due to the
+high diversity of soil and the concordant low coverage.  The
 dominant partition size is remarkably refractory to the graph's false
 positive rate, increasing by far less than 1\% for a 15-fold increase
 in false positives; this shows that our theoretical and
@@ -435,7 +440,12 @@ already been exploited for assembly improvement: Trinity relies on a
 partitioning approach in the second phase of transcriptome assembly;
 and both Meta-IDBA and MetaVelvet rely on locality of coverage and and
 discovery of components for metagenome assembly
-\cite{trinity,pubmed21685107,metavelvet}.  These algorithms, however,
+\cite{trinity,pubmed21685107,metavelvet}.  Once partitioned, components
+can be assembled with parameters chosen for the coverage and sequence
+heterogeneity present in each partition.  Moreover, data sets partitioned
+at a low $k_0$ can be exactly assembled with any $k \ge k_0$, because
+overlaps of $k_0$ bases include all overlaps of greater length.
+Existing approaches to partitioning, however,
 rely on exact graph representations that are more memory intensive
 than the one presented here.  The utility of the probabilistic graph
 representation for partitioning rests on its significantly lower
@@ -451,23 +461,19 @@ on many real data sets.
 
 \subsection{Concluding thoughts}
 
-% @@ mention utility for trinity, etc.
 % @@ read, cite references from pop
 
 Developing efficient and accurate approaches to de novo assembly
-continues to be one of the ``grand challenges'' of bioinformatics,
-with significant implications for investigation of life on Earth, much
-of which has not been sampled (cite).  While our appreciation is
-growing for the role that microbes play in biogeochemical processes,
+continues to be one of the ``grand challenges'' of bioinformatics
+\cite{pubmed22147368}.  Improved metagenome assembly approaches are
+necessary for the investigation of life on Earth, much
+of which has not been sampled \cite{terabasemetag}.  While our appreciation is
+only growing for the role that microbes play in biogeochemical processes,
 we are increasingly limited by our ability to analyze the data.  For
 example, the Earth Microbiome Project is generating petabytes of
 sequencing data from complex microbial communities, many of which
 contain entirely novel ensembles of microbes; scaling de novo assembly
-is a critical part of this investigation (cite).  Furthermore, scaling
-de novo assembly should result in improved assemblies, as it will
-allow more compute-intensive algorithms to be applied; this is
-especially true for divide-and-conquer approaches, which scale
-dramatically.
+is a critical part of this investigation \cite{emp2010}.
 
 The probabilistic de Bruijn graph representation presented here has a
 number of convenient features for storing and analyzing large assembly
@@ -486,14 +492,16 @@ independent of the k-mer size chosen, making this representation
 convenient for exploring properties at many different parameters.  It
 also allows the storage and traversal of de Bruijn graphs at multiple
 k-mer sizes within a single structure, although we have not yet
-explored these properties.
+explored these properties.  And fourth, it supports a memory-efficient
+``divide-and-conquer'' approach, partitioning, that exploits underlying biological features of
+the data.
 
 Our initial motivation for developing this use of Bloom filters was to
 explore partitioning as an approach to scaling metagenome assembly,
 but there are many additional uses beyond metagenomics.  Partitioning
 has been applied to mRNAseq assembly as well, so this graph representation also be
-useful for scaling transcriptome assembly \cite{trinity}.  In general
-a more memory efficient de Bruijn graph representation could open up
+useful for scaling transcriptome assembly \cite{trinity}.
+More broadly, a more memory efficient de Bruijn graph representation could open up
 many opportunities.  While de Bruijn graph approaches are currently
 being used primarily for the purposes of assembly, they are a broadly
 useful formalism for sequence analysis. In particular, they have been
@@ -505,23 +513,12 @@ and artifact detection in large sequencing data sets.  The ability to
 scale graph storage by a factor of 10 or more may also result in
 additional uses for de Bruijn graphs.
 
-%While de Bruijn graphs have traditionally been viewed as
-%heavy weight computational solutions due to the extremely large memory
-%requirements, our initial investigations into the PDBG described here
-%demonstrate a $\approx$ 20-fold decrease in memory requirements over
-%Velvet.  This may translate into similar memory savings in these other
-%applications.  One significant caveat to this reduced memory usage is
-%that as only the graph structure itself is stored in the Bloom
-%filters, additional information such as node weights and traversal
-%waypoints will take up additional memory.  Such questions remain to be
-%explored in future work.
-
 \begin{materials}
 
 \section{Genome and Sequence Data}
 We used the \emph{E. coli} K-12 MG1655 genome (GenBank: U00096.2) and two MG1655 Illumina 
 datasets (Short Read Archive accessions SRX000429 and SRX000430) for E. coli
-analyses.
+analyses.  The MSB2 soil data set is available as SRA accession SRNNNNNN.
 
 \section{Data Structure Implementation}
 We implemented a variation on the Bloom filter data structure to store
@@ -532,8 +529,8 @@ prime-number-sized hash tables, each with a different hash
 function corresponding to the modulus of the DNA bitstring
 representation with the hash table size; this is a computationally convenient way to construct hash functions for DNA strings.  The underlying properties of
 the Bloom filter are identical.  To add a k-mer to the
-filter, the corresponding bit is set to 1 in each hash table.  To find
-the presence of a k-mer, each table is queried for the presence of
+filter, the corresponding bit in each hash table is set to 1.  To find
+a k-mer, each table is queried for the presence of
 that k-mer; for a k-mer to be considered present in the dataset, the
 k-mer must be found in all of the hash tables.  If a k-mer is not
 present in any one hash table, then it is certainly not in the
@@ -690,7 +687,7 @@ Z.~DR.
 \newblock Genome assembly and comparison using de {B}ruijn graphs.
 \newblock Ph.D. thesis, University of Cambridge, 2009.
 
-\bibitem{pubmed21304727}
+\bibitem{terabasemetag}
 J.~Gilbert, F.~Meyer, D.~Antonopoulos, P.~Balaji, C.~Brown, C.~Brown, N.~Desai,
   J.~Eisen, D.~Evers, D.~Field, W.~Feng, D.~Huson, J.~Jansson, R.~Knight,
   J.~Knight, E.~Kolker, K.~Konstantindis, J.~Kostka, N.~Kyrpides,
@@ -699,6 +696,16 @@ J.~Gilbert, F.~Meyer, D.~Antonopoulos, P.~Balaji, C.~Brown, C.~Brown, N.~Desai,
 \newblock Meeting report: the terabase metagenomics workshop and the vision of
   an earth microbiome project.
 \newblock {\em Stand Genomic Sci}, 3(3):243--8, 2010.
+
+\bibitem{emp2010}
+Gilbert, J., Meyer, F., Jansson, J., Gordon, J., Pace, N., Tiedje, J., Ley, R.,
+  Fierer, N., Field, D., Kyrpides, N., Glockner, F., Klenk, H., Wommack, K.,
+  Glass, E., Docherty, K., Gallery, R., Stevens, R.  and Knight, R.
+  (2010{\rm{b}}).
+\newblock The Earth Microbiome Project: Meeting report of the '1 EMP meeting on
+  sample selection and acquisition' at Argonne National Laboratory October 6
+  2010.
+\newblock {\rm Stand Genomic Sci } \emph{3}, 249--53.
 
 \bibitem{pmid21187386}
 S.~Gnerre, I.~Maccallum, D.~Przybylski, F.~J. Ribeiro, J.~N. Burton, B.~J.
@@ -761,6 +768,36 @@ Y.~Zhang and M.~Waterman.
   by an {E}ulerian {P}ath {A}pproach.
 \newblock In {\em Cold Spring Harbor Symposia on Quantitative Biology},
   volume~68, pages 205--212. Cold Spring Harbor Laboratory Press, 2003.
+
+\bibitem{metahit}
+Qin, J., Li, R., Raes, J., Arumugam, M., Burgdorf, K., Manichanh, C., Nielsen,
+  T., Pons, N., Levenez, F., Yamada, T., Mende, D., Li, J., Xu, J., Li, S., Li,
+  D., Cao, J., Wang, B., Liang, H., Zheng, H., Xie, Y., Tap, J., Lepage, P.,
+  Bertalan, M., Batto, J., Hansen, T., Paslier, D.~L., Linneberg, A., Nielsen,
+  H., Pelletier, E., Renault, P., Sicheritz-Ponten, T., Turner, K., Zhu, H.,
+  Yu, C., Li, S., Jian, M., Zhou, Y., Li, Y., Zhang, X., Li, S., Qin, N., Yang,
+  H., Wang, J., Brunak, S., Dore, J., Guarner, F., Kristiansen, K., Pedersen,
+  O., Parkhill, J., Weissenbach, J., Bork, P., Ehrlich, S.  and Wang, J.
+  (2010{\rm{}}).
+\newblock A human gut microbial gene catalogue established by metagenomic
+  sequencing.
+\newblock {\rm Nature } \emph{464}, 59--65.
+
+\bibitem{rumen}
+Hess, M., Sczyrba, A., Egan, R., Kim, T., Chokhawala, H., Schroth, G., Luo, S.,
+  Clark, D., Chen, F., Zhang, T., Mackie, R., Pennacchio, L., Tringe, S.,
+  Visel, A., Woyke, T., Wang, Z.  and Rubin, E. (2011{\rm{}}).
+\newblock Metagenomic discovery of biomass-degrading genes and genomes from cow
+  rumen.
+\newblock {\rm Science } \emph{331}, 463--7.
+
+\bibitem{sargasso}
+Venter, J., Remington, K., Heidelberg, J., Halpern, A., Rusch, D., Eisen, J.,
+  Wu, D., Paulsen, I., Nelson, K., Nelson, W., Fouts, D., Levy, S., Knap, A.,
+  Lomas, M., Nealson, K., White, O., Peterson, J., Hoffman, J., Parsons, R.,
+  Baden-Tillson, H., Pfannkoch, C., Rogers, Y.  and Smith, H. (2004{\rm{}}).
+\newblock Environmental genome shotgun sequencing of the Sargasso Sea.
+\newblock {\rm Science } \emph{304}, 66--74.
 
 \end{thebibliography}
 
