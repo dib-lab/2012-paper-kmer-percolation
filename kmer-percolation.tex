@@ -5,9 +5,11 @@
 %   reference tables!!
 
 \documentclass{pnastwo}
+\pdfoutput=1
 %\documentclass[draft]{pnastwo}
-\usepackage[pdftex]{graphicx}
-\graphicspath{{figures/}}
+%\usepackage[pdftex]{graphicx}
+\usepackage{graphicx}
+%\graphicspath{{figures/}}
 
 \begin{document}
 
@@ -51,7 +53,7 @@ sequencing data from complex microbial populations are an increasingly
 large practical barrier to environmental studies.  Here we introduce a
 memory-efficient graph representation with which we can analyze the
 k-mer connectivity of metagenomic samples, allowing us to reduce the
-size of de novo assembly process for metagenomes with a ``divide and
+size of the de novo assembly process for metagenomes with a ``divide and
 conquer'' algorithm.  This graph representation is based on a
 probabilistic data structure, a Bloom filter, that allows us to store
 assembly graphs in as little as 4 bits per k-mer.  We use this
@@ -851,10 +853,10 @@ The graph (right) is traversed by starting at a k-mer and then testing all possi
 \end{figure}
 
 \begin{figure}
-\includegraphics[width=2in]{figures/f3b001}
-\includegraphics[width=2in]{figures/f3b005}
-\includegraphics[width=2in]{figures/f3b010}
-\includegraphics[width=2in]{figures/f3b015}
+\includegraphics[width=2in]{f3b001}
+\includegraphics[width=2in]{f3b005}
+\includegraphics[width=2in]{f3b010}
+\includegraphics[width=2in]{f3b015}
 
 \caption{Graph visualizations demonstrating the decreasing fidelity of
   graph structure with increasing false positive rate. From top left
@@ -874,7 +876,7 @@ rate approaches the percolation threshold.
 \end{figure}
 
 \begin{figure}
-\center{\includegraphics[width=5in]{figures/newdiam}}
+\center{\includegraphics[width=5in]{newdiam}}
 
 \caption{The diameter of randomly generated 58bp long circular
   chromosomes in 8-mer space remains constant for false
@@ -884,7 +886,7 @@ rate approaches the percolation threshold.
 \end{figure}
 
 \begin{figure}
-\center{\includegraphics[width=5in]{figures/newpart}}
+\center{\includegraphics[width=5in]{newpart}}
 
 \caption{The graph shows the number of partitions for a simulated dataset with
   1,000 contigs of 10,000 bp each (circles). For $n=5$ different
@@ -923,7 +925,7 @@ False positive rate & Bits/k-mer \\ \hline
 \caption{Effects of loading \emph{E. coli} data at different false positive rates}
 \begin{tabular*}{\hsize}{@{\extracolsep{\fill}}ccccccc}
 \hline
-Graph & Total k-mers & False k-mers & \% Real & Deg $\ge 2$ & Mem (bytes) \\ \hline
+Graph & Total k-mers & False k-mers & \% Real & Deg $> 2$ & Mem (bytes) \\ \hline
 \emph{E. coli} at 0\% & 4,530,123 & 0 & 100 & 50,605 & $2.1 \times 10^{9}$ \\
 \emph{E. coli} at 1\% & 4,814,050 & 283,927 & 94.1 & 313,844 & $5.4 \times 10^6$ \\
 \emph{E. coli} at 5\% & 6,349,301 & 1,819,178 & 71.3 & 1,339,102 & $3.5 \times 10^6$ \\
