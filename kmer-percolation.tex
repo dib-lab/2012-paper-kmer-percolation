@@ -67,7 +67,7 @@ soil metagenome sample.
 \section{Introduction}
 
 De novo assembly of shotgun sequencing reads into longer contiguous
-sequences plays an important role in virtually all genomic research.
+sequences plays an important role in virtually all genomic research (@@).
 However, current computational methods for sequence assembly do not
 scale well to the volume of sequencing data now readily available from
 next-generation sequencing machines \cite{pubmed22147368}.  In particular, the deep
@@ -79,9 +79,9 @@ Shotgun sequencing produces hundreds of millions or billions of short
 sequences that are randomly read from the sample, and assembly of
 these short sequences into longer, non-redundant sequences is
 critically important for gene content analysis.  The process of
-sequence assembly relies upon overlap analysis between many short
-sequences, and efficient overlap analysis in turn requires a
-substantial amount of working memory in order to store these overlaps,
+sequence assembly relies upon connecting many short
+sequences, and efficient connectivity analysis in turn requires a
+substantial amount of working memory in order to store overlaps,
 which limits many assembly packages \cite{pubmed22147368}.
 
 Assembly of these short reads is particularly important for the sequencing
@@ -128,8 +128,8 @@ and ABySS~\cite{velvet,abyss}. We relate
 changes in local and
 global graph connectivity to the false positive rate of the underlying
 Bloom filters, and show that the graph's global structure is accurate
-until an abrupt transition in false connectivity near a false positive
-rate of 0.183, corresponding to a lower memory limit of approximately
+for false positives rates of 15\% or lower, 
+corresponding to a lower memory limit of approximately
 4 bits per graph node.
 
 We also apply this graph representation to reduce the memory needed
@@ -251,22 +251,22 @@ Percolation thresholds for finite graphs can be estimated by finding
 where the component size distribution transitions from linear to
 quadratic in form \cite{stauffer1979scaling}.  Using the calculation
 method described in \emph{Methods}, we found the site percolation
-threshold for DNA de Bruijn graphs to be $p_\theta = 0.183 \pm 0.001$.
-Although we only tested within a limited range of k from 20 to 32, the
+threshold for DNA de Bruijn graphs to be $p_\theta = 0.183 \pm 0.001$
+for k between 5 and 12.
+Although we only tested within this limited range of k, the
 percolation threshold appears to be independent of different $k$ (see
 Figure~S1).
 Thus, as long as the false positive rate is below $0.183$, we
 predict that truly disconnected components in the graph are unlikely
 to connect to one another erroneously, that is, due to errors
 introduced by the probabilistic representation.
-%% @@do we need to demonstrate k independence anywhere? => S1
 
 \subsection{Large-scale graph structure is retained up to the percolation threshold}
 
 The results from component size analysis and the percolation threshold
 estimation suggest that global connectivity of the graph is unlikely
-to change below the percolation threshold.  Do we see this invariance
-in global connectivity below the percolation threshold?
+to change below a false positive rate of 18\%.  Do we see this invariance
+in global connectivity in other graph measures?
 
 To assess global connectivity, we employed the diameter metric in
 graph theory, the length of the ``longest shortest'' path between any two
@@ -282,8 +282,8 @@ At each
 false positive rate, we ran the simulation 500 times and estimated the
 mean within a 95\% confidence interval using percentile bootstrap. As
 Figure~\ref{fig:diam} shows, erroneous connections between pairs of
-real k-mers are rare below the percolation threshold. For false
-positive rates at or above the percolation threshold, spurious
+real k-mers are rare below a false positive rate of 20\%.
+For false above this threshold, spurious
 connections between real k-mers are created, which lowers the
 diameter.  Thus, the larger scale graph structure is retained through
 $p > 0.183$, as suggested by the component size analysis and
@@ -343,8 +343,8 @@ positive rate of 1\%.  While this direct comparison can not be made fairly -- as
 Can we use this low-memory graph representation to find and separate
 components in de Bruijn graphs?  The primary concern is that false positive
 nodes or edges would connect components, but the diameter results suggest that
-components are unlikely to connect below the percolation
-threshold. To verify this, we analyzed a simulated dataset of 1,000
+components are unlikely to connect below a 20\% false positive rate.
+To verify this, we analyzed a simulated dataset of 1,000
 randomly generated sequences of length 10,000 bp.  Using $k=31$,
 we partitioned the data across many different false positive rates,
 using the procedure described in \emph{Methods}. As predicted, the
