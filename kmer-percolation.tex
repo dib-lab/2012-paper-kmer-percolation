@@ -70,10 +70,10 @@ soil metagenome sample.
 
 De novo assembly of shotgun sequencing reads into longer contiguous
 sequences plays an important role in virtually all genomic research
-\cite{pubmed20195499}.
+\cite{pubmed19482960}.
 However, current computational methods for sequence assembly do not
 scale well to the volume of sequencing data now readily available from
-next-generation sequencing machines \cite{pubmed22147368}.  In particular, the deep
+next-generation sequencing machines \cite{pubmed19482960,pubmed22147368}.  In particular, the deep
 sequencing required to sample complex microbial environments easily
 results in data sets that surpass the working memory of available
 computers \cite{metahit,rumen}.
@@ -81,7 +81,7 @@ computers \cite{metahit,rumen}.
 Shotgun sequencing produces hundreds of millions or billions of short
 sequences that are randomly read from the sample, and assembly of
 these short sequences into longer, non-redundant sequences is
-critically important for gene content analysis.  The process of
+critically important for gene content analysis \cite{pubmed19482960}.  The process of
 sequence assembly relies upon connecting many short
 sequences, and efficient connectivity analysis in turn requires a
 substantial amount of working memory in order to store overlaps,
@@ -89,7 +89,7 @@ which limits many assembly packages \cite{pubmed22147368}.
 
 Assembly of these short reads is particularly important for the sequencing
 and analysis of complex microbial ecosystems, which can contain
-thousands and even millions of different microbial species \cite{pubmed16123304}.  These
+thousands and even millions of different microbial species \cite{pubmed20195499,pubmed16123304}.  These
 ecosystems mediate important biogeochemical processes but are still
 poorly understood at a molecular level, in large part because they
 consist of many microbes that cannot be cultured or studied
@@ -514,7 +514,7 @@ being used primarily for the purposes of assembly, they are a broadly
 useful formalism for sequence analysis. In particular, they have been
 extended to efficient multiple-sequence alignment,
 repeat discovery, and detection of local and
-structural sequence variation \cite{zerbinothesis,mzhang2003dna,price2005novo}.  We are also
+structural sequence variation \cite{zerbinothesis,zhang2003dna,price2005novo}.  We are also
 exploring the use of de Bruijn graphs for graph-based homology search
 and artifact detection in large sequencing data sets.  The ability to
 scale graph storage by a factor of 10 or more may also result in
@@ -661,6 +661,11 @@ Institute through the Great Lakes Bioenergy Research Center.
 
 \begin{thebibliography}{10}
 
+\bibitem{pubmed19482960}
+M.~Pop.
+\newblock Genome assembly reborn: recent computational challenges.
+\newblock {\em Brief Bioinform}, 10(4):354--66, 2009.
+
 \bibitem{pubmed22147368}
 S.~Salzberg, A.~Phillippy, A.~Zimin, D.~Puiu, T.~Magoc, S.~Koren, T.~Treangen,
   M.~Schatz, A.~Delcher, M.~Roberts, G.~Marcais, M.~Pop, and J.~Yorke.
@@ -689,6 +694,11 @@ Hess, M., Sczyrba, A., Egan, R., Kim, T., Chokhawala, H., Schroth, G., Luo, S.,
 \newblock Metagenomic discovery of biomass-degrading genes and genomes from cow
   rumen.
 \newblock {\rm Science } \emph{331}, 463--7.
+
+\bibitem{pubmed20195499}
+J.~Wooley, A.~Godzik, and I.~Friedberg.
+\newblock A primer on metagenomics.
+\newblock {\em PLoS Comput Biol}, 6(2):e1000667, 2010.
 
 \bibitem{pubmed16123304}
 J.~Gans, M.~Wolinsky, and J.~Dunbar.
