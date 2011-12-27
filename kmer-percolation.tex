@@ -66,8 +66,11 @@ soil metagenome sample.
 
 \section{Introduction}
 
+
+
 De novo assembly of shotgun sequencing reads into longer contiguous
-sequences plays an important role in virtually all genomic research (@@).
+sequences plays an important role in virtually all genomic research
+\cite{pubmed20195499}.
 However, current computational methods for sequence assembly do not
 scale well to the volume of sequencing data now readily available from
 next-generation sequencing machines \cite{pubmed22147368}.  In particular, the deep
@@ -90,11 +93,11 @@ thousands and even millions of different microbial species \cite{pubmed16123304}
 ecosystems mediate important biogeochemical processes but are still
 poorly understood at a molecular level, in large part because they
 consist of many microbes that cannot be cultured or studied
-individually in the lab.  Ensemble sequencing (``metagenomics'') of
+individually in the lab \cite{pubmed20195499}.  Ensemble sequencing (``metagenomics'') of
 these complex environments is one of the few ways to render them
 accessible, and has resulted in substantial early progress in
 understanding the composition and function of the ocean, human gut, cow
-rumen, and permafrost soil \cite{sargasso,metahit,rumen,permafrost}.  However, as sequencing capacity grows,
+rumen, and permafrost soil \cite{metahit,rumen,sargasso,permafrost}.  However, as sequencing capacity grows,
 the assembly of sequences from these complex samples has become
 increasingly computationally challenging.  Current methods for short-read assembly rely on
 inexact data reduction in which reads from low-abundance organisms are
@@ -122,20 +125,20 @@ detection, set membership queries on Bloom filters can yield false
 positives -- elements marked as present that do not actually exist --
 but not false negatives.  We show that this probabilistic graph
 representation can be used to efficiently store and traverse DNA de
-Bruijn graphs with a greater than 30-fold decrease in memory usage
+Bruijn graphs with a greater than 20-fold decrease in memory usage
 over two common de Bruijn graph-based assemblers, Velvet
 and ABySS~\cite{velvet,abyss}. We relate 
 changes in local and
 global graph connectivity to the false positive rate of the underlying
 Bloom filters, and show that the graph's global structure is accurate
-for false positives rates of 15\% or lower, 
+for false positive rates of 15\% or lower, 
 corresponding to a lower memory limit of approximately
 4 bits per graph node.
 
-We also apply this graph representation to reduce the memory needed
+We apply this graph representation to reduce the memory needed
 to assemble a soil metagenome sample, through
 the use of read partitioning.  Partitioning divides a de Bruijn graph up
-into disconnected graph components; these components can then be used to
+into disconnected graph components; these components can be used to
 subdivide sequencing reads into disconnected subsets that can be
 assembled separately.
 This exploits a convenient biological
@@ -204,7 +207,7 @@ positive rates.  After storing this single sequence in compressible
 graphs using $k=31$ with four different false positive rates
 ($p_f$=0.01, 0.05, 0.10, and 0.15), we explored the graph using
 breadth-first search beginning at the first 31-mer.  The graphs in
-Figure \ref{fig:circles} demonstrate how the local graph structure elaborates with the
+Figure \ref{fig:circles} illustrate how the local graph structure elaborates with the
 false positive rate while the overall circular graph structure
 remains, with no erroneous shortcuts between k-mers that are present
 in the original sequence.  It is visually apparent that even a high false positive rate of 15\% does not systematically and erroneously connect distant k-mers.
@@ -283,10 +286,10 @@ false positive rate, we ran the simulation 500 times and estimated the
 mean within a 95\% confidence interval using percentile bootstrap. As
 Figure~\ref{fig:diam} shows, erroneous connections between pairs of
 real k-mers are rare below a false positive rate of 20\%.
-For false above this threshold, spurious
+For false positive rates above this threshold, spurious
 connections between real k-mers are created, which lowers the
-diameter.  Thus, the larger scale graph structure is retained through
-$p > 0.183$, as suggested by the component size analysis and
+diameter.  Thus, the larger scale graph structure is retained up through
+$p = 0.183$, as suggested by the component size analysis and
 percolation results.
 
 \subsection{Sequencing errors eclipse false positives}
@@ -407,7 +410,8 @@ calculations, and partitioning of simulated and real data demonstrate that
 below the calculated percolation threshold this is not a significant
 problem.  As long as the false positive rate is below 18.3\%,
 long false paths are not spontaneously created and the
-large scale graph properties do not change.
+large scale graph properties do not change.  Above this rate, the global
+graph structure slowly degrades.
 
 Our partitioning results on a real soil metagenome, the MSB2 data set,
 demonstrate the utility of partitioning for reducing memory usage.
@@ -443,7 +447,7 @@ already been exploited for assembly improvement: Trinity relies on a
 partitioning approach in the second phase of transcriptome assembly;
 and both Meta-IDBA and MetaVelvet rely on locality of coverage and and
 discovery of components for metagenome assembly
-\cite{trinity,pubmed21685107,metavelvet}.  Once partitioned, components
+\cite{metavelvet,pubmed21685107,trinity}.  Once partitioned, components
 can be assembled with parameters chosen for the coverage and sequence
 heterogeneity present in each partition.  Moreover, data sets partitioned
 at a low $k_0$ can be exactly assembled with any $k \ge k_0$, because
@@ -495,22 +499,22 @@ independent of the k-mer size chosen, making this representation
 convenient for exploring properties at many different parameters.  It
 also allows the storage and traversal of de Bruijn graphs at multiple
 k-mer sizes within a single structure, although we have not yet
-explored these properties.  And fourth, it supports a memory-efficient
-``divide-and-conquer'' approach, partitioning, that exploits underlying biological features of
+explored these properties.  And fourth, it supports memory-efficient
+partitioning, a ``divide-and-conquer'' approach that exploits underlying biological features of
 the data.
 
 Our initial motivation for developing this use of Bloom filters was to
 explore partitioning as an approach to scaling metagenome assembly,
 but there are many additional uses beyond metagenomics.  Partitioning
-has been applied to mRNAseq assembly as well, so this graph representation also be
+has been applied to mRNAseq assembly as well, so this graph representation may also be
 useful for scaling transcriptome assembly \cite{trinity}.
 More broadly, a more memory efficient de Bruijn graph representation could open up
-many opportunities.  While de Bruijn graph approaches are currently
+many additional opportunities.  While de Bruijn graph approaches are currently
 being used primarily for the purposes of assembly, they are a broadly
 useful formalism for sequence analysis. In particular, they have been
-extended to efficient multiple-sequence alignment\cite{zhang2003dna},
-repeat discovery\cite{price2005novo}, and detection of local and
-structural sequence variation \cite{zerbinothesis}.  We are also
+extended to efficient multiple-sequence alignment,
+repeat discovery, and detection of local and
+structural sequence variation \cite{zerbinothesis,mzhang2003dna,price2005novo}.  We are also
 exploring the use of de Bruijn graphs for graph-based homology search
 and artifact detection in large sequencing data sets.  The ability to
 scale graph storage by a factor of 10 or more may also result in
@@ -643,7 +647,7 @@ paper are available in the khmer repository.
 We thank Chris Adami, Qingpeng Zhang, and Tracy Teal for
 thoughtful comments, and Jim Cole and Jordan Fish for discussion of future
 applications.  This project was supported by AFRI Competitive Grant
-no. 2010-65205-20361 from the USDA NIFA, and NSF IOS-0923812.  The
+no. 2010-65205-20361 from the USDA NIFA and NSF IOS-0923812, both to CTB.  The
 MSB2 soil metagenome was sequenced by the DOE's Joint Genome
 Institute through the Great Lakes Bioenergy Research Center.
 
@@ -880,7 +884,7 @@ rate approaches the percolation threshold.
 
 \caption{The diameter of randomly generated 58bp long circular
   chromosomes in 8-mer space remains constant for false
-  positive rates below 18.3\%. Only real (non-error) k-mers are considered for
+  positive rates up through 18.3\%. Only real (non-error) k-mers are considered for
   starting and ending points.}
 \label{fig:diam}
 \end{figure}
@@ -962,8 +966,11 @@ False positive rate & Total memory use (improvement) & Largest partition size in
 \begin{figure}
 \center{\includegraphics[width=5in]{s1}}
 
-\caption{Demonstration of k independence by testing for percolation 
-threshold with multiple values of k.}
+\caption{Demonstration of k independence by determining the
+  percolation threshold with multiple values of k (5-12).  $p$ on the
+  x axis is the fraction of nodes present, and $\theta$ on the y axis
+  is the fraction of nodes in the largest component.  Lower values of
+  k have greater finite size sampling errors.}
 
 \label{fig:kindependence}
 \end{figure}
