@@ -56,8 +56,9 @@ sequencing data from complex microbial populations are an increasingly
 large practical barrier to environmental studies.  Here we introduce a
 memory-efficient graph representation with which we can analyze the
 k-mer connectivity of metagenomic samples, allowing us to reduce the
-size of the de novo assembly process for metagenomes with a ``divide and
-conquer'' algorithm.  This graph representation is based on a
+size of the de novo assembly process for metagenomes with a partitioning 
+step to divide the assembly graph into separate groups. This graph 
+representation is based on a
 probabilistic data structure, a Bloom filter, that allows us to store
 assembly graphs in as little as 4 bits per k-mer.  We use this
 approach to achieve a 20-fold decrease in memory for the assembly of a
@@ -114,7 +115,7 @@ This graph is then traversed to determine contiguous sequences
 \cite{pubmed22068540}.  Because de Bruijn graphs store only k-mers,
 memory usage scales with the number of unique k-mers in the data set
 rather than the number of reads.  Thus human genomes can be assembled
-with as little as 512gb of system memory \cite{pmid21187386}.  For more
+with less than 512GB of system memory \cite{pmid21187386}.  For more
 complex samples such as soil metagenomes, which may possess millions
 or more species, terabytes of memory would be required to store the graph.  Moreover, the wide variation in species abundance
 limits the utility of standard memory-reduction practices such as
@@ -184,7 +185,7 @@ a fixed number of entries, a larger Bloom filter has lower occupancy
 and produces correspondingly fewer false positives, while a smaller
 Bloom filter has higher occupancy and produces more false
 positives. In exchange for memory, we can store k-mer nodes more or
-less efficiently: for example, for a false positive rate of 15\%, at
+less accurately: for example, for a false positive rate of 15\%, at
 which 1 in 6 random k-mers tested would be falsely considered present,
 each real k-mer can be stored in under 4 bits of memory (see
 Table~\ref{table:bitskmer}).
@@ -280,7 +281,8 @@ vertices~\cite{bondy2008graph}.  If shorter paths were being systematically
 generated due to false positives, we would expect the diameter of components to
 decrease as the false positive rate increased.
 We randomly generated 58bp
-long circular chromosomes to construct components containing 50 8-mers
+long circular chromosomes (50bp read with the first 8-mer appended to the 
+end of the string) to construct components containing 50 8-mers
 and calculated the diameter at different false positive rates. 
 We only considered paths
 between two real k-mers in the dataset.  
@@ -314,7 +316,7 @@ different false positive rates.
 For these comparisons, we used a $k$ value of 17, which allows us to
 use enough memory that our Bloom filters are exact, i.e. we have no
 false positives because we can store $4^{17}$ entries precisely in
-2gb of system memory.
+2GB of system memory.
 We found a
 total of 50,605 17-mers in the exact representation that were not part
 of a simple line, i.e. had more than two neighbors (degree $>$ 2). As
@@ -337,8 +339,8 @@ errors demonstrated by sequencers dwarf the errors caused by the
 inexact graph representation below a reasonable false positive rate.
 
 When we assemble this data set with the Velvet and ABySS assemblers at
-k=31, Velvet requires 3.7gb to assemble the data set,
-while ABySS requires 1.6gb; this memory usage is dominated by the
+k=31, Velvet requires 3.7GB to assemble the data set,
+while ABySS requires 1.6GB; this memory usage is dominated by the
 graph storage \cite{zerbinothesis}. Thus the Bloom filter approach stores graphs 30 or
 more times more efficiently than either program, even with a low false
 positive rate of 1\%.  While this direct comparison can not be made fairly -- assemblers store the graph as well as k-mer abundances and other information -- it does suggest that there are opportunities for improving memory usage.
@@ -370,9 +372,9 @@ Once we obtained the partition sets, we individually assembled each
 set of partitions, as well as the entire (unpartitioned) data set,
 retaining contigs longer than 500 bp.  The resulting assemblies were
 all identical, containing 1,444 contigs with a total assembled
-sequence of 1.07 megabases.  The unpartitioned data set required 33gb to
+sequence of 1.07 megabases.  The unpartitioned data set required 33GB to
 assemble with ABySS, while the partitioned data sets all required
-under 1.5gb to partition and assemble -- a decrease in over 20x
+under 1.5GB to partition and assemble -- a decrease in over 20x
 in memory usage for an identical result.
 
 % @CTB repartitioning
@@ -464,7 +466,7 @@ memory usage.
 Combined with the scaling
 properties of the graph representation, partitioning with this probabilistic
 de Bruijn graph representation offers a way to
-efficiently apply a ``divide and conquer'' strategy to certain
+efficiently apply a partitioning strategy to certain
 assembly problems.  While this work focuses on theoretical properties
 of the graph representation, the next step will be to evaluate the approach
 on many real data sets.
@@ -668,13 +670,14 @@ Institute through the Great Lakes Bioenergy Research Center.
 computational challenges. {\it Brief Bioinform}, 10(4):354--66.
 
 \bibitem{pubmed22147368} Salzberg~S, et al. (2011) GAGE: A critical 
-evaluation of genome assemblies and assembly algorithms. {\it Genome Res}.
+evaluation of genome assemblies and assembly algorithms. {\it Genome Res} 
+22(3):557-67.
 
 \bibitem{metahit} Qin ~J, et al. (2010) A human gut microbial gene catalogue 
 established by metagenomic sequencing. {\it Nature} \emph{464}, 59--65.
 
 \bibitem{rumen} Hess~M, et al. (2011) Metagenomic discovery of 
-biomass-degrading genes and genomes from cow rumen. {\it Science } 
+biomass-degrading genes and genomes from cow rumen. {\it Science} 
 \emph{331}, 463--7.
 
 \bibitem{pubmed20195499} Wooley~J, Godzik~A, and Friedberg~I. (2010) A primer 
@@ -685,7 +688,7 @@ Computational improvements reveal great bacterial diversity and high metal
 toxicity in soil. {\it Science}, 309(5739):1387--90.
 
 \bibitem{sargasso} Venter~J, et al. (2004) Environmental genome shotgun 
-sequencing of the Sargasso Sea. {\it Science } \emph{304}, 66--74.
+sequencing of the Sargasso Sea. {\it Science} \emph{304}, 66--74.
 
 \bibitem{permafrost} Mackelprang~R, et al. (2011) Metagenomic analysis of a 
 permafrost microbial community reveals a rapid response to thaw. {\it Nature}, 
@@ -714,10 +717,10 @@ Biol}, 11(11):R116.
 allowable errors. {\it CACM}, 13(7):422--426.
 
 \bibitem{velvet} Zerbino~DR, Birney~E. (2008) Velvet: algorithms for de novo 
-short read assembly using de Bruijn graphs. {\it Genome Res.}, 18(5):821-9.
+short read assembly using de Bruijn graphs. {\it Genome Res}, 18(5):821-9.
 
 \bibitem{abyss} Simpson~JT, et al. (2009) ABySS: a parallel assembler for 
-short read sequence data. {\it Genome Res.}, 19(6):1117-23.
+short read sequence data. {\it Genome Res}, 19(6):1117-23.
 
 \bibitem{metavelvet} Namiki~T, Hachiya~T, Tanaka~H, and Sakakibara~Y. (2011) 
 MetaVelvet: An extension of Velvet assembler to de novo metagenome assembly 
@@ -729,7 +732,8 @@ a de Novo assembler for metagenomic data. {\it Bioinformatics},
 27(13):i94--i101.
 
 \bibitem{trinity} Grabherr~M, et al. (2011) Full-length transcriptome assembly 
-from RNA-Seq data without a reference genome. {\it Nature biotechnology}.
+from RNA-Seq data without a reference genome. {\it Nat Biotechnol}, 
+29(7):644-52.
 
 \bibitem{staufferintro} Stauffer~D and Aharony~A. (2010) Introduction to 
 Percolation Theory. {\it Taylor and Frances e-Library}.
@@ -749,12 +753,12 @@ Stand Genomic Sci}, 3(3):243--8.
 
 \bibitem{emp2010} Gilbert~J, et al. (2010) The Earth Microbiome Project: 
 Meeting report of the ``1 EMP meeting on sample selection and acquisition'' 
-at Argonne National Laboratory October 6 2010. {\it Stand Genomic Sci } 
+at Argonne National Laboratory October 6 2010. {\it Stand Genomic Sci} 
 \emph{3}, 249--53.
 
 \bibitem{zhang2003dna} Zhang~Y and Waterman~M. (2003) DNA Sequence Assembly 
 and Multiple Sequence Alignment by an Eulerian Path Approach. In {\it Cold 
-Spring Harbor Symposia on Quantitative Biology}, volume~68, pages 205--212. 
+Spring Harbor Symposia on Quantitative Biology}, volume~68, pp 205--212. 
 Cold Spring Harbor Laboratory Press.
 
 \bibitem{price2005novo} Price~A, Jones~N, and Pevzner~P. (2005) De novo 
@@ -766,7 +770,7 @@ Broder~A and Mitzenmacher~M. (2004) Network applications of bloom filters:
 A survey. {\it Internet Mathematics}, 1(4):485--509.
 
 \bibitem{adami2002critical} Adami~C and Chu~J. (2002) Critical and 
-near-critical branching processes. {\it Physical Review E}, 66(1):011907.
+near-critical branching processes. {\it Phys Rev E}, 66(1):011907.
 
 \bibitem{wald43} Wald~A. (1943) Tests of statistical hypotheses concerning 
 several parameters when the number of observations is large. {\it Transactions 
@@ -881,10 +885,10 @@ Reads at 15\% & 231,687,063 & 227,157,037 & 1.9 & 113,489,902 & $2.3 \times 10^7
 \begin{tabular*}{\hsize}{@{\extracolsep{\fill}}cccc}
 False positive rate & Total memory use (improvement) & Largest partition size in reads \cr
 \hline
-1\% & 2.0gb (16.5x) & 344,426 \cr
-5\% & 1.55gb (21.3x) & 344,426 \cr
-10\% & 1.43gb (23.1x) & 344,428 \cr
-15\% & 2.2gb (15x) & 344,784 \cr
+1\% & 2.0GB (16.5x) & 344,426 \cr
+5\% & 1.55GB (21.3x) & 344,426 \cr
+10\% & 1.43GB (23.1x) & 344,428 \cr
+15\% & 2.2GB (15x) & 344,784 \cr
 \hline
 \end{tabular*}
 
