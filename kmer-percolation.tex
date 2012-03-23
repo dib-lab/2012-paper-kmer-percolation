@@ -127,7 +127,11 @@ storing de Bruijn graphs in memory, based on Bloom filters
 structures for storing sparse sets; essentially hash tables without collision
 detection, set membership queries on Bloom filters can yield false
 positives -- elements marked as present that do not actually exist --
-but not false negatives.  We show that this probabilistic graph
+but not false negatives. While Bloom filters have been used in Bioinformatics 
+software tools in the 
+past\cite{bloomref1,bloomref2,bloomref3,bloomref4}, to our knowledge this is 
+the first time they have been used for assembly graph traversal. We show that 
+this probabilistic graph
 representation can be used to efficiently store and traverse DNA de
 Bruijn graphs with a greater than 20-fold decrease in memory usage
 over two common de Bruijn graph-based assemblers, Velvet
@@ -710,11 +714,25 @@ of mammalian genomes from massively parallel sequence data. {\it Proc Natl
 Acad Sci USA}, 108:1513--1518.
 
 \bibitem{pubmed21114842} Kelley~D, Schatz~M, and Salzberg~S. (2010) Quake: 
-quality-aware detection and correction of sequencing errors. {\em Genome 
+quality-aware detection and correction of sequencing errors. {\it Genome 
 Biol}, 11(11):R116.
 
 \bibitem{bloom} Bloom~B. (1970) Space/time tradeoffs in hash coding with 
 allowable errors. {\it CACM}, 13(7):422--426.
+
+\bibitem{bloomref1} Shi H. (2010) A parallel algorithm for error correction 
+in high-throughput short-read data on CUDA-enabled graphics hardware. {\it 
+J Comput Biol}, 17(4):603-615.
+
+\bibitem{bloomref2} Stranneheim~H. (2010) Classification of DNA sequences 
+using Bloom filters. {\it Bioinformatics} 26(13):1595-1600.
+
+\bibitem{bloomref3} Malsted~P. (2011) Efficient counting of k-mers in DNA 
+sequences using a bloom filter. {\it BMC Bioinformatics} 12:333.
+
+\bibitem{bloomref4} Liu~Y. DecGPU: distributed error correction on 
+massively parallel graphics processing units using CUDA and MPI. {\it 
+BMC Bioinformatics} 12:85.
 
 \bibitem{velvet} Zerbino~DR, Birney~E. (2008) Velvet: algorithms for de novo 
 short read assembly using de Bruijn graphs. {\it Genome Res}, 18(5):821-9.
