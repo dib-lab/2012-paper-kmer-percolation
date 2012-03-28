@@ -646,7 +646,7 @@ separated based on their partition.
 
 We used ABySS v1.3.1 and Velvet v1.1.07 to perform assemblies.
 The ABySS command was: {\tt mpirun -np 8 ABYSS-P -k31 -o contigs.fa reads.fa}.
-The Velvet commands were: {\tt velveth test 31 -fasta -short reads.fa \&\& velvetg test}.
+The Velvet commands were: {\tt velveth assem 31 -fasta -short reads.fa \&\& velvetg assem}.
 We did not use Velvet for the partitioning analysis because Velvet's
 error correction algorithm is stochastic and results in dissimilar
 assemblies for different read order.
