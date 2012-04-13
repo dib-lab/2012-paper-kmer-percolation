@@ -63,7 +63,7 @@ step to divide the assembly graph into separate groups. This graph
 representation is based on a
 probabilistic data structure, a Bloom filter, that allows us to store
 assembly graphs in as little as 4 bits per k-mer.  We use this
-approach to achieve a 20-fold decrease in memory for the assembly of a
+approach to achieve a nearly 40-fold decrease in memory for the assembly of a
 soil metagenome sample.
 
 \end{abstract}
@@ -129,9 +129,13 @@ storing de Bruijn graphs in memory, based on Bloom filters
 structures for storing sparse sets; essentially hash tables without collision
 detection, set membership queries on Bloom filters can yield false
 positives -- elements marked as present that do not actually exist --
-but not false negatives.  We show that this probabilistic graph
+but not false negatives. While Bloom filters have been used in Bioinformatics 
+software tools in the 
+past\cite{bloomref1,bloomref2,bloomref3,bloomref4}, to our knowledge this is 
+the first time they have been used for assembly graph traversal. We show that 
+this probabilistic graph
 representation can be used to efficiently store and traverse DNA de
-Bruijn graphs with a greater than 20-fold decrease in memory usage
+Bruijn graphs with 20 to 40-fold decrease in memory usage
 over two common de Bruijn graph-based assemblers, Velvet
 and ABySS~\cite{velvet,abyss}. We relate 
 changes in local and
@@ -154,7 +158,7 @@ been used to improve the quality of metagenome and transcriptome assemblies
 by adapting assembly parameters to local coverage of the graph~\cite{metavelvet,pubmed21685107,trinity}.  However, to our knowledge, partitioning has not been applied
 to scaling metagenome assembly. By applying the
 probabilistic de Bruijn graph representation to the problem of
-partitioning, we achieve a dramatic decrease of 20-fold in the memory
+partitioning, we achieve a dramatic decrease of nearly 40-fold in the memory
 required for assembly of a soil metagenome.
 
 % @@ exact/inexact data influence
@@ -190,7 +194,7 @@ positives. In exchange for memory, we can store k-mer nodes more or
 less accurately: for example, for a false positive rate of 15\%, at
 which 1 in 6 random k-mers tested would be falsely considered present,
 each real k-mer can be stored in under 4 bits of memory (see
-Table~\ref{table:bitskmer}).
+Table~\ref{table:bitskmer}).	
 
 Using a probabilistic data structure to store k-mer nodes does
 cause one potential problem: in contrast to an exact graph storage, there is a chance that a k-mer
@@ -285,7 +289,13 @@ decrease as the false positive rate increased.
 We randomly generated 58bp
 long circular chromosomes (50bp read with the first 8-mer appended to the 
 end of the string) to construct components containing 50 8-mers
-and calculated the diameter at different false positive rates. 
+and calculated the diameter at different false positive rates. We kept 
+$k$ low because we needed to be able to exhaustively explore the graph 
+even beyond the percolation threshold, which is computationally 
+expensive to do at higher k values. Furthermore, larger circular chromosomes 
+would be more likely to erroneously connect at a fixed $k$, but due to the 
+relatively low number of possible 8-mers, we had to keep the chromosomes 
+small.  
 We only considered paths
 between two real k-mers in the dataset.  
 At each
@@ -316,9 +326,10 @@ representation of the genome, and inexact representations with
 different false positive rates.
 
 For these comparisons, we used a $k$ value of 17, which allows us to
-use enough memory that our Bloom filters are exact, i.e. we have no
+use enough a bitmap for exact graph storage, i.e. we have no
 false positives because we can store $4^{17}$ entries precisely in
-2GB of system memory.
+2GB of system memory. This is equivalent to a Bloom filter with one 
+hash table and a 0\% false positive rate.
 We found a
 total of 50,605 17-mers in the exact representation that were not part
 of a simple line, i.e. had more than two neighbors (degree $>$ 2). As
@@ -367,16 +378,18 @@ from an Illumina GAII sequencer.  We calculated the number of unique
 31-mers present in the data set to be 1.35 billion. Then, for each of
 several false positive rates (see Table \ref{table:parts}) we loaded
 the reads into a graph, eliminated components containing fewer than
-500 unique k-mers, and partitioned the reads into separate files based
+200 unique k-mers, and partitioned the reads into separate files based
 on graph connectivity.
 
 Once we obtained the partition sets, we individually assembled each
-set of partitions, as well as the entire (unpartitioned) data set,
+set of partitions using ABySS, as well as the entire (unpartitioned) 
+data set,
 retaining contigs longer than 500 bp.  The resulting assemblies were
 all identical, containing 1,444 contigs with a total assembled
 sequence of 1.07 megabases.  The unpartitioned data set required 33GB to
 assemble with ABySS, while the partitioned data sets all required
-under 1.5GB to partition and assemble -- a decrease in over 20x
+under 1.75GB to partition into seperate components and assemble -- 
+a decrease in over 18x
 in memory usage for an identical result.
 
 % @CTB repartitioning
@@ -391,7 +404,10 @@ The use of Bloom filters to store a de Bruijn graph is
 straightforward and memory efficient.  The expected false positive
 rate can be tuned based on desired memory usage,
 yielding a wide range of possible storage efficiencies
-(Table \ref{table:bitskmer}).
+(Table \ref{table:bitskmer}). Since memory usage is k independent 
+in Bloom filters, it is more efficient than the theoretical lower-bound 
+for a lossless exact representation when the number of k-mers inserted 
+in the graph is sparsely populated, which is dependent on k (Figure~S2).
 
 Even for low false positive rates such as 1\%, this is still an
 efficient graph representation, with a greater than 30-fold
@@ -632,7 +648,7 @@ separated based on their partition.
 
 We used ABySS v1.3.1 and Velvet v1.1.07 to perform assemblies.
 The ABySS command was: {\tt mpirun -np 8 ABYSS-P -k31 -o contigs.fa reads.fa}.
-The Velvet commands were: {\tt velveth test 31 -fasta -short reads.fa \&\& velvetg test}.
+The Velvet commands were: {\tt velveth assem 31 -fasta -short reads.fa \&\& velvetg assem}.
 We did not use Velvet for the partitioning analysis because Velvet's
 error correction algorithm is stochastic and results in dissimilar
 assemblies for different read order.
@@ -669,6 +685,10 @@ Institute through the Great Lakes Bioenergy Research Center.
 %\bibliography{foo2}
 
 \begin{thebibliography}{10}
+
+%\bibitem{nrcbook} National Research Council (US). Committee on Metagenomics 
+%and Functional Applications (2007) The new science of metagenomics: revealing 
+%the secrets of our microbial planet. {\it Natl Academy Pr}.
 
 \bibitem{pubmed19482960} Pop~M. (2009) Genome assembly reborn: recent 
 computational challenges. {\it Brief Bioinform}, 10(4):354--66.
@@ -714,11 +734,25 @@ of mammalian genomes from massively parallel sequence data. {\it Proc Natl
 Acad Sci USA}, 108:1513--1518.
 
 \bibitem{pubmed21114842} Kelley~D, Schatz~M, and Salzberg~S. (2010) Quake: 
-quality-aware detection and correction of sequencing errors. {\em Genome 
+quality-aware detection and correction of sequencing errors. {\it Genome 
 Biol}, 11(11):R116.
 
 \bibitem{bloom} Bloom~B. (1970) Space/time tradeoffs in hash coding with 
 allowable errors. {\it CACM}, 13(7):422--426.
+
+\bibitem{bloomref1} Shi H. (2010) A parallel algorithm for error correction 
+in high-throughput short-read data on CUDA-enabled graphics hardware. {\it 
+J Comput Biol}, 17(4):603-615.
+
+\bibitem{bloomref2} Stranneheim~H. (2010) Classification of DNA sequences 
+using Bloom filters. {\it Bioinformatics} 26(13):1595-1600.
+
+\bibitem{bloomref3} Malsted~P. (2011) Efficient counting of k-mers in DNA 
+sequences using a bloom filter. {\it BMC Bioinformatics} 12:333.
+
+\bibitem{bloomref4} Liu~Y. DecGPU: distributed error correction on 
+massively parallel graphics processing units using CUDA and MPI. {\it 
+BMC Bioinformatics} 12:85.
 
 \bibitem{velvet} Zerbino~DR, Birney~E. (2008) Velvet: algorithms for de novo 
 short read assembly using de Bruijn graphs. {\it Genome Res}, 18(5):821-9.
@@ -822,7 +856,8 @@ rate approaches the percolation threshold.
 \center{\includegraphics[width=5in]{newdiam}}
 
 \caption{The diameter of randomly generated 58bp long circular
-  chromosomes in 8-mer space remains constant for false
+  chromosomes in 8-mer (i.e. a cycle of 50 8-mers) space remains 
+constant for false
   positive rates up through 18.3\%. Only real (non-error) k-mers are considered for
   starting and ending points.}
 \label{fig:diam}
@@ -868,7 +903,7 @@ False positive rate & Bits/k-mer \\ \hline
 \caption{Effects of loading \emph{E. coli} data at different false positive rates}
 \begin{tabular*}{\hsize}{@{\extracolsep{\fill}}ccccccc}
 \hline
-Graph & Total k-mers & False k-mers & \% Real & Deg $> 2$ & Mem (bytes) \\ \hline
+Graph & Total k-mers & False connected k-mers & \% Real & Deg $> 2$ & Mem (bytes) \\ \hline
 \emph{E. coli} at 0\% & 4,530,123 & 0 & 100 & 50,605 & $2.1 \times 10^{9}$ \\
 \emph{E. coli} at 1\% & 4,814,050 & 283,927 & 94.1 & 313,844 & $5.4 \times 10^6$ \\
 \emph{E. coli} at 5\% & 6,349,301 & 1,819,178 & 71.3 & 1,339,102 & $3.5 \times 10^6$ \\
@@ -889,10 +924,10 @@ Reads at 15\% & 231,687,063 & 227,157,037 & 1.9 & 113,489,902 & $2.3 \times 10^7
 \begin{tabular*}{\hsize}{@{\extracolsep{\fill}}cccc}
 False positive rate & Total memory use (improvement) & Largest partition size in reads \cr
 \hline
-1\% & 2.0GB (16.5x) & 344,426 \cr
-5\% & 1.55GB (21.3x) & 344,426 \cr
-10\% & 1.43GB (23.1x) & 344,428 \cr
-15\% & 2.2GB (15x) & 344,784 \cr
+1\% & 1.75GB (18.8x) & 344,426 \cr
+5\% & 1.20GB (27.5x) & 344,426 \cr
+10\% & 0.96GB (34.37x) & 344,426 \cr
+15\% & 0.83GB (39.75x) & 344,426 \cr
 \hline
 \end{tabular*}
 
@@ -913,6 +948,19 @@ False positive rate & Total memory use (improvement) & Largest partition size in
 
 \label{fig:kindependence}
 \end{figure}
+
+\begin{figure}
+\center{\includegraphics[width=6in]{memusg}}
+
+\caption{Comparison between Bloom filters at different false positive 
+rates with the information-theoretic lossless lower bound at different 
+k values. Bloom filters are k independent and are more efficient than 
+any lossless data structure for higher k due to greater sparseness in 
+k-mers inserted compared to all possible k-mers.}
+
+\label{fig:membound}
+\end{figure}
+
 \makeatother
 
 %% @@effects of local graph elaboration on partitioning/traversal alg?
