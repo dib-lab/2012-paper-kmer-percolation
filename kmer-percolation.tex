@@ -91,7 +91,7 @@ critically important for gene content analysis \cite{pubmed19482960}.  The proce
 sequence assembly relies upon connecting many short
 sequences, and efficient connectivity analysis in turn requires a
 substantial amount of working memory in order to store overlaps,
-which limits many assembly packages \cite{pubmed22147368}.
+which limits many assemblers \cite{pubmed22147368}.
 
 Assembly of these short reads is particularly important for the sequencing
 and analysis of complex microbial ecosystems, which can contain
@@ -102,7 +102,7 @@ consist of many microbes that cannot be cultured or studied
 individually in the lab \cite{pubmed20195499}.  Ensemble sequencing (``metagenomics'') of
 these complex environments is one of the few ways to render them
 accessible, and has resulted in substantial early progress in
-understanding the composition and function of the ocean, human gut, cow
+understanding the microbial composition and function of the ocean, human gut, cow
 rumen, and permafrost soil \cite{metahit,rumen,sargasso,permafrost}.  However, as sequencing capacity grows,
 the assembly of sequences from these complex samples has become
 increasingly computationally challenging.  Current methods for short-read assembly rely on
@@ -176,7 +176,7 @@ and $N_2$ if and only if $N_1$ and $N_2$ share a (k-1)-mer that is a
 prefix of $N_1$ and a postfix of $N_2$, or vice versa (see Figure
 \ref{fig:bloomgraph}).  This edge is not stored explicitly.
 
-Thus each k-mer has up to 8 edges connecting to 8 neighbors, which can be determined by
+Thus each k-mer has up to 8 edges connecting to 8 neighboring k-mers, which can be determined by
 simply building all possible 1-base extensions and testing for their
 presence in the Bloom filter.  In doing so, we implicitly treat the
 graph as a simple graph as opposed to a multigraph, which
@@ -206,7 +206,7 @@ decreased, false positive vertices and edges are gained, so
 compressing the graph results in a more tightly interconnected graph.
 If the false positive rate is too high, the graph structure will be
 dominated by false connectivity -- but what rate is ``too high''?  We
-study this in detail below.
+study this key question in detail below.
 
 \subsection{False positives cause local elaboration of graph structure}
 
@@ -292,7 +292,7 @@ end of the string) to construct components containing 50 8-mers
 and calculated the diameter at different false positive rates. We kept 
 $k$ low because we needed to be able to exhaustively explore the graph 
 even beyond the percolation threshold, which is computationally 
-expensive to do at higher k values. Furthermore, larger circular chromosomes 
+prohibitive to do at higher k values. Furthermore, larger circular chromosomes 
 would be more likely to erroneously connect at a fixed $k$, but due to the 
 relatively low number of possible 8-mers, we had to keep the chromosomes 
 small.  
@@ -476,7 +476,7 @@ heterogeneity present in each partition.  Moreover, data sets partitioned
 at a low $k_0$ can be exactly assembled with any $k \ge k_0$, because
 overlaps of $k_0-1$ bases include all overlaps of greater length.
 Existing approaches to partitioning, however,
-rely on exact graph representations that are more memory intensive
+rely on exact graph representations that are significantly more memory intensive
 than the one presented here.  The utility of the probabilistic graph
 representation for partitioning rests on its significantly lower
 memory usage.
@@ -496,9 +496,10 @@ on many real data sets.
 Developing efficient and accurate approaches to de novo assembly
 continues to be one of the ``grand challenges'' of bioinformatics
 \cite{pubmed22147368}.  Improved metagenome assembly approaches are
-necessary for the investigation of life on Earth, much
-of which has not been sampled \cite{terabasemetag}.  While our appreciation is
-only growing for the role that microbes play in biogeochemical processes,
+particularly important for the investigation of microbial life on Earth, much
+of which has not been sampled \cite{terabasemetag}.  While our appreciation
+for the role that microbes play in biogeochemical processes is
+only growing ,
 we are increasingly limited by our ability to analyze the data.  For
 example, the Earth Microbiome Project is generating petabytes of
 sequencing data from complex microbial communities, many of which
@@ -533,11 +534,11 @@ has been applied to mRNAseq assembly as well, so this graph representation may a
 useful for scaling transcriptome assembly \cite{trinity}.
 More broadly, a more memory efficient de Bruijn graph representation could open up
 many additional opportunities.  While de Bruijn graph approaches are currently
-being used primarily for the purposes of assembly, they are a broadly
+being used primarily for the purposes of assembly, they are a generally
 useful formalism for sequence analysis. In particular, they have been
 extended to efficient multiple-sequence alignment,
 repeat discovery, and detection of local and
-structural sequence variation \cite{zerbinothesis,zhang2003dna,price2005novo}.  We are also
+structural sequence variation \cite{zerbinothesis,zhang2003dna,price2005novo,iqbalcortex}.  We are also
 exploring the use of de Bruijn graphs for graph-based homology search
 and artifact detection in large sequencing data sets.  The ability to
 scale graph storage by a factor of 10 or more may also result in
