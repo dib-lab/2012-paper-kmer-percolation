@@ -309,11 +309,11 @@ diameter.  Thus, the larger scale graph structure is retained up through
 $p = 0.183$, as suggested by the component size analysis and
 percolation results.
 
-\subsection{Sequencing errors eclipse false positives}
+\subsection{Erroneous k-mers from sequencing eclipse graph false positives}
 
-One important consideration for the utility of the de Bruijn graph
-representation is to compare it with graphs built from real data from
-massively parallel sequencers such as Illumina, which contain base
+It is important to compare the errors from false positives in the de
+Bruijn graph representation with errors from real data.  In particular,
+real data from massively parallel sequencers will contain base
 calling errors.  In de Bruijn graph-based assemblers, these sequencing
 errors add to the graph complexity and make it more difficult to find
 high-quality paths for generating long, accurate contigs. Since our
@@ -529,10 +529,11 @@ the data.
 
 Our initial motivation for developing this use of Bloom filters was to
 explore partitioning as an approach to scaling metagenome assembly,
-but there are many additional uses beyond metagenomics.  Partitioning
-has been applied to mRNAseq assembly as well, so this graph representation may also be
-useful for scaling transcriptome assembly \cite{trinity}.
-More broadly, a more memory efficient de Bruijn graph representation could open up
+but there are many additional uses beyond metagenomics.  Here we describe
+exact partitioning of the graph into components, but {\em inexact}
+partitioning has been successfully applied to mRNAseq assembly \cite{trinity}.  Inexact partitioning, as done by the Chrysalis component of the Trinity pipeline, uses heuristics to subdivide the graph for later assembly,
+and this data structure should be usable for this purpose as well.
+More broadly, a more memory efficient de Bruijn graph representation opens up
 many additional opportunities.  While de Bruijn graph approaches are currently
 being used primarily for the purposes of assembly, they are a generally
 useful formalism for sequence analysis. In particular, they have been
@@ -541,7 +542,7 @@ repeat discovery, and detection of local and
 structural sequence variation \cite{zerbinothesis,zhang2003dna,price2005novo,iqbalcortex}.  We are also
 exploring the use of de Bruijn graphs for graph-based homology search
 and artifact detection in large sequencing data sets.  The ability to
-scale graph storage by a factor of 10 or more may also result in
+more efficiently store graphs in memory may also result in
 additional uses for de Bruijn graphs.
 
 \begin{materials}
@@ -549,7 +550,7 @@ additional uses for de Bruijn graphs.
 \section{Genome and Sequence Data}
 We used the \emph{E. coli} K-12 MG1655 genome (GenBank: U00096.2) and two MG1655 Illumina 
 datasets (Short Read Archive accessions SRX000429 and SRX000430) for E. coli
-analyses.  The MSB2 soil data set is available as SRA accession SRNNNNNN.
+analyses.  The MSB2 soil data set is available as SRA accession SRA050710.1.
 
 \section{Data Structure Implementation}
 We implemented a variation on the Bloom filter data structure to store
@@ -865,14 +866,15 @@ constant for false
 \end{figure}
 
 \begin{figure}
-\center{\includegraphics[width=5in]{newpart}}
+\center{\includegraphics[width=6in]{memusg}}
 
-\caption{The graph shows the number of partitions for a simulated dataset with
-  1,000 contigs of 10,000 bp each (circles). For $n=5$ different
-  combinations of hash table sizes, there was no variation in results
-  for the simulated dataset.}
+\caption{Comparison between Bloom filters at different false positive 
+rates with the information-theoretic lossless lower bound at different 
+k values. Bloom filters are k independent and are more efficient than 
+any lossless data structure for higher k due to greater sparseness in 
+k-mers inserted compared to all possible k-mers.}
 
-\label{fig:partfp}
+\label{fig:membound}
 \end{figure}
 
 % Memory
@@ -951,15 +953,14 @@ False positive rate & Total memory use (improvement) & Largest partition size in
 \end{figure}
 
 \begin{figure}
-\center{\includegraphics[width=6in]{memusg}}
+\center{\includegraphics[width=5in]{newpart}}
 
-\caption{Comparison between Bloom filters at different false positive 
-rates with the information-theoretic lossless lower bound at different 
-k values. Bloom filters are k independent and are more efficient than 
-any lossless data structure for higher k due to greater sparseness in 
-k-mers inserted compared to all possible k-mers.}
+\caption{The graph shows the number of partitions for a simulated dataset with
+  1,000 contigs of 10,000 bp each (circles). For $n=5$ different
+  combinations of hash table sizes, there was no variation in results
+  for the simulated dataset.}
 
-\label{fig:membound}
+\label{fig:partfp}
 \end{figure}
 
 \makeatother
