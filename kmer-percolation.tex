@@ -5,6 +5,7 @@
 %   reference tables!!
 %   @put in the missing reference
 %   @do we want to partition hchc and metahit?
+%%  ref nature methods review
 
 \documentclass{pnastwo}
 \pdfoutput=1
@@ -53,26 +54,25 @@ C. Titus Brown
 
 \begin{abstract}
 
-The memory requirements for de novo assembly of short-read shotgun
-sequencing data from complex microbial populations are an increasingly
-large practical barrier to environmental studies.  Here we introduce a
-memory-efficient graph representation with which we can analyze the
-k-mer connectivity of metagenomic samples, allowing us to reduce the
-size of the de novo assembly process for metagenomes with a partitioning 
-step to divide the assembly graph into separate groups. This graph 
-representation is based on a
-probabilistic data structure, a Bloom filter, that allows us to store
-assembly graphs in as little as 4 bits per k-mer.  We use this
-approach to achieve a nearly 40-fold decrease in memory for the assembly of a
-soil metagenome sample.
+The high memory requirements for de novo assembly of short-read
+shotgun sequencing data from complex microbial populations are an
+increasingly large practical barrier to environmental studies.  Here
+we introduce a memory-efficient graph representation with which we can
+analyze the k-mer connectivity of metagenomic samples.  The graph
+representation is based on a probabilistic data structure, a Bloom
+filter, that allows us to efficiently store assembly graphs in as
+little as 4 bits per k-mer.  We implement this data structure and use
+it for a partitioning approach in which we subdivide the graph into
+components, thus reducing the overall memory requirements for de novo
+assembly of metagenomes.  We apply this approach to a soil metagenome
+sample and achieve a nearly 40-fold decrease in the maximum memory
+requirements for assembly.
 
 \end{abstract}
 
 \keywords{metagenomics | de novo assembly | de Bruijn graphs | k-mers}
 
 \section{Introduction}
-
-
 
 De novo assembly of shotgun sequencing reads into longer contiguous
 sequences plays an important role in virtually all genomic research
@@ -84,16 +84,7 @@ sequencing required to sample complex microbial environments easily
 results in data sets that surpass the working memory of available
 computers \cite{metahit,rumen}.
 
-Shotgun sequencing produces hundreds of millions or billions of short
-sequences that are randomly read from the sample, and assembly of
-these short sequences into longer, non-redundant sequences is
-critically important for gene content analysis \cite{pubmed19482960}.  The process of
-sequence assembly relies upon connecting many short
-sequences, and efficient connectivity analysis in turn requires a
-substantial amount of working memory in order to store overlaps,
-which limits many assemblers \cite{pubmed22147368}.
-
-Assembly of these short reads is particularly important for the sequencing
+Deep sequencing and assembly of short reads is particularly important for the sequencing
 and analysis of complex microbial ecosystems, which can contain
 thousands and even millions of different microbial species \cite{pubmed20195499,pubmed16123304}.  These
 ecosystems mediate important biogeochemical processes but are still
@@ -109,6 +100,15 @@ increasingly computationally challenging.  Current methods for short-read assemb
 inexact data reduction in which reads from low-abundance organisms are
 discarded, biasing analyses towards high-abundance organisms \cite{metahit,rumen,permafrost}.
 
+% Shotgun sequencing produces hundreds of millions or billions of short
+% sequences that are randomly read from the sample, and assembly of
+% these short sequences into longer, non-redundant sequences is
+% critically important for gene content analysis \cite{pubmed19482960}.  The process of
+% sequence assembly relies upon connecting many short
+% sequences, and efficient connectivity analysis in turn requires a
+% substantial amount of working memory in order to store overlaps,
+% which limits many assemblers \cite{pubmed22147368}.
+
 The predominant assembly formalism applied to short-read sequencing
 data sets is a de Bruijn graph \cite{pubmed11504945,pubmed20211242,pubmed22068540}.
 In a de Bruijn graph approach, sequencing reads are decomposed into
@@ -116,7 +116,7 @@ fixed-length words, or k-mers, and used to build a connectivity graph.
 This graph is then traversed to determine contiguous sequences
 \cite{pubmed22068540}.  Because de Bruijn graphs store only k-mers,
 memory usage scales with the number of unique k-mers in the data set
-rather than the number of reads.  Thus human genomes can be assembled
+rather than the number of reads @@.  Thus human genomes can be assembled
 with less than 512GB of system memory \cite{pmid21187386}.  For more
 complex samples such as soil metagenomes, which may possess millions
 or more species, terabytes of memory would be required to store the graph.  Moreover, the wide variation in species abundance
@@ -134,8 +134,11 @@ software tools in the
 past\cite{bloomref1,bloomref2,bloomref3,bloomref4}, to our knowledge this is 
 the first time they have been used for assembly graph traversal. We show that 
 this probabilistic graph
-representation can be used to efficiently store and traverse DNA de
-Bruijn graphs with 20 to 40-fold decrease in memory usage
+representation more efficiently stores de Bruijn graphs than any possible
+exact representation, for a wide range of useful parameters.  We also demonstrate
+that it
+can be used to store and traverse actual DNA de
+Bruijn graphs with a 20- to 40-fold decrease in memory usage
 over two common de Bruijn graph-based assemblers, Velvet
 and ABySS~\cite{velvet,abyss}. We relate 
 changes in local and
@@ -410,8 +413,8 @@ for a lossless exact representation when the number of k-mers inserted
 in the graph is sparsely populated, which is dependent on k (Figure~S2).
 
 Even for low false positive rates such as 1\%, this is still an
-efficient graph representation, with a greater than 30-fold
-improvement in memory usage over two existing assemblers, Velvet and
+efficient graph representation, with significant
+improvements in both theoretical memory usage (Figure @@) and actual memory usage compared to two existing assemblers, Velvet and
 ABySS (Table \ref{table:ecoli}).  We can store k-mers in this data structure with a much smaller
 set of ``erroneous'' k-mers than those generated by sequencing errors,
 and the Bloom filter false positive rates have less of an effect on
@@ -426,12 +429,12 @@ depending on the specific application.
 
 Using a probabilistic graph representation with false positive nodes
 and edges raises the specter of systematic graph artifacts resulting
-from the false positives.  For partitioning, the primary concern is that false
-positives will incorrectly connect components, rendering partitioning
-ineffective.  Our results from percolation analysis, diameter
+from the false positives.  For partitioning, our primary concern was that false
+positives would incorrectly connect components, rendering partitioning
+ineffective.  The results from percolation analysis, diameter
 calculations, and partitioning of simulated and real data demonstrate that
-below the calculated percolation threshold this is not a significant
-problem.  As long as the false positive rate is below 18.3\%,
+below the calculated percolation threshold there is no significant false
+connectivity.  As long as the false positive rate is below 18.3\%,
 long false paths are not spontaneously created and the
 large scale graph properties do not change.  Above this rate, the global
 graph structure slowly degrades.
@@ -467,8 +470,8 @@ There are several biological problems that are particularly well
 suited to a partitioning approach.  Like metagenomes, transcriptomes
 consist of populations of many {\em disconnected} sequences.  This has
 already been exploited for assembly improvement: Trinity relies on a
-partitioning approach in the second phase of transcriptome assembly;
-and both Meta-IDBA and MetaVelvet rely on locality of coverage and and
+partitioning approach in the second phase of transcriptome assembly,
+while both Meta-IDBA and MetaVelvet rely on locality of coverage and and
 discovery of components for metagenome assembly
 \cite{metavelvet,pubmed21685107,trinity}.  Once partitioned, components
 can be assembled with parameters chosen for the coverage and sequence
@@ -486,8 +489,9 @@ properties of the graph representation, partitioning with this probabilistic
 de Bruijn graph representation offers a way to
 efficiently apply a partitioning strategy to certain
 assembly problems.  While this work focuses on theoretical properties
-of the graph representation, the next step will be to evaluate the approach
-on many real data sets.
+of the graph representation and analyzes only one real data set, the
+results are promising; the next step will be to evaluate the approach
+on many more real data sets.
 
 \subsection{Concluding thoughts}
 
@@ -524,15 +528,15 @@ convenient for exploring properties at many different parameters.  It
 also allows the storage and traversal of de Bruijn graphs at multiple
 k-mer sizes within a single structure, although we have not yet
 explored these properties.  And fourth, it supports memory-efficient
-partitioning, a ``divide-and-conquer'' approach that exploits underlying biological features of
-the data.
+partitioning, an approach that exploits underlying biological features of
+the data to divide the data set into disconnected subsets.
 
 Our initial motivation for developing this use of Bloom filters was to
 explore partitioning as an approach to scaling metagenome assembly,
 but there are many additional uses beyond metagenomics.  Here we describe
 exact partitioning of the graph into components, but {\em inexact}
-partitioning has been successfully applied to mRNAseq assembly \cite{trinity}.  Inexact partitioning, as done by the Chrysalis component of the Trinity pipeline, uses heuristics to subdivide the graph for later assembly,
-and this data structure should be usable for this purpose as well.
+partitioning has been successfully applied to mRNAseq assembly \cite{trinity}.  Inexact partitioning, as done by the Chrysalis component of the Trinity pipeline, uses heuristics to subdivide the graph for later assembly;
+the data structure described in this work can be used for this purpose as well.
 More broadly, a more memory efficient de Bruijn graph representation opens up
 many additional opportunities.  While de Bruijn graph approaches are currently
 being used primarily for the purposes of assembly, they are a generally
@@ -540,8 +544,8 @@ useful formalism for sequence analysis. In particular, they have been
 extended to efficient multiple-sequence alignment,
 repeat discovery, and detection of local and
 structural sequence variation \cite{zerbinothesis,zhang2003dna,price2005novo,iqbalcortex}.  We are also
-exploring the use of de Bruijn graphs for graph-based homology search
-and artifact detection in large sequencing data sets.  The ability to
+exploring the use of de Bruijn graphs for graph-based error correction,
+graph-based homology search, and graph-based artifact detection in large sequencing data sets.  The ability to
 more efficiently store graphs in memory may also result in
 additional uses for de Bruijn graphs.
 
