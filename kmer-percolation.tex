@@ -54,19 +54,24 @@ C. Titus Brown
 
 \begin{abstract}
 
-The high memory requirements for de novo assembly of short-read
-shotgun sequencing data from complex microbial populations are an
-increasingly large practical barrier to environmental studies.  Here
+Deep sequencing has enabled the investigation of a wide range of
+environmental microbial ecosystems, but the high memory requirements
+for de novo assembly of short-read shotgun sequencing data from these
+complex populations are an increasingly large practical barrier.  Here
 we introduce a memory-efficient graph representation with which we can
 analyze the k-mer connectivity of metagenomic samples.  The graph
 representation is based on a probabilistic data structure, a Bloom
 filter, that allows us to efficiently store assembly graphs in as
-little as 4 bits per k-mer.  We implement this data structure and use
-it for a partitioning approach in which we subdivide the graph into
-components, thus reducing the overall memory requirements for de novo
-assembly of metagenomes.  We apply this approach to a soil metagenome
-sample and achieve a nearly 40-fold decrease in the maximum memory
-requirements for assembly.
+little as 4 bits per k-mer.  We show that this data structure
+accurately represents DNA assembly graphs in low memory.  We apply
+this data structure to the problem of partitioning assembly graphs
+into components as a prelude to assembly, and show that this reduces
+the overall memory requirements for {\em de novo} assembly of
+metagenomes.  On one soil metagenome assembly, this approach achieves
+a nearly 40-fold decrease in the maximum memory requirements for
+assembly.  This probabilistic graph representation is thus
+a theoretical advance as well as providing immediate leverage on
+metagenomic assembly.
 
 \end{abstract}
 
