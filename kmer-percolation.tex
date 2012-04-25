@@ -436,8 +436,6 @@ errors which resemble the real sequence.  This feature may further
 reduce the effect of false positives on de Bruijn graph analysis,
 depending on the specific application.
 
-\subsection{Preservation of long-range structure permits graph partitioning}
-
 Using a probabilistic graph representation with false positive nodes
 and edges raises the specter of systematic graph artifacts resulting
 from the false positives.  For partitioning, our primary concern was
@@ -449,6 +447,8 @@ no significant false connectivity.  As long as the false positive rate
 is below 18.3\%, long false paths are not spontaneously created and
 the large scale graph properties do not change.  Above this rate, the
 global graph structure slowly degrades.
+
+\subsection{Preservation works on a real data set}
 
 Our partitioning results on a real soil metagenome, the MSB2 data set,
 demonstrate the utility of partitioning for reducing memory usage.
@@ -514,11 +514,11 @@ continues to be one of the ``grand challenges'' of bioinformatics
 particularly important for the investigation of microbial life on
 Earth, much of which has not been sampled \cite{terabasemetag}.  While
 our appreciation for the role that microbes play in biogeochemical
-processes is only growing , we are increasingly limited by our ability
+processes is only growing, we are increasingly limited by our ability
 to analyze the data.  For example, the Earth Microbiome Project is
 generating petabytes of sequencing data from complex microbial
 communities, many of which contain entirely novel ensembles of
-microbes; scaling de novo assembly is a critical part of this
+microbes; scaling de novo assembly is a critical requirement of this
 investigation \cite{emp2010}.
 
 The probabilistic de Bruijn graph representation presented here has a
@@ -561,8 +561,8 @@ variation \cite{zerbinothesis,zhang2003dna,price2005novo,iqbalcortex}.
 We are also exploring the use of de Bruijn graphs for graph-based
 error correction, graph-based homology search, and graph-based
 artifact detection in large sequencing data sets.  The ability to more
-efficiently store graphs in memory may also result in additional uses
-for de Bruijn graphs.
+efficiently store assembly graphs in memory will surely result in
+additional uses for de Bruijn graphs.
 
 \begin{materials}
 
