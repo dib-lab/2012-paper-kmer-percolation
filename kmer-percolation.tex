@@ -468,8 +468,8 @@ graph; the higher memory usage observed for partitioning at a false
 positive rate of 15\% is due to the increase in component size from
 local false positives.  Regardless, the memory requirements for
 downstream assembly of partitions is driven by the size of the largest
-partition, which here is very small (345,000 reads; Table
-%\ref{table:parts}) due to the high diversity of soil and the
+partition, which here is very small (345,000 reads; Table \ref{table:parts}) 
+due to the high diversity of soil and the
 concordant low coverage.  The dominant partition size is remarkably
 refractory to the graph's false positive rate, increasing by far less
 than 1\% for a 15-fold increase in false positives; this shows that
@@ -837,6 +837,8 @@ of the American Mathematical Society}, 54:426--482.
 
 \end{article}
 
+\clearpage
+
 \begin{figure}
 \centering
 \includegraphics[width=5in]{bloomgraph}
@@ -845,6 +847,8 @@ The graph (right) is traversed by starting at a k-mer and then testing all possi
 
 \label{fig:bloomgraph}
 \end{figure}
+
+\clearpage
 
 \begin{figure}
 \includegraphics[width=2in]{f3b001}
@@ -862,6 +866,8 @@ The graph (right) is traversed by starting at a k-mer and then testing all possi
 \label{fig:circles}
 \end{figure}
 
+\clearpage
+
 \begin{figure}
 \center{\includegraphics[width=5in]{newclust}}
 \caption{Average component size versus false positive rate. The average 
@@ -870,6 +876,8 @@ rate approaches the percolation threshold.
 }
 \label{fig:clustersize}
 \end{figure}
+
+\clearpage
 
 \begin{figure}
 \center{\includegraphics[width=5in]{newdiam}}
@@ -882,6 +890,8 @@ constant for false
 \label{fig:diam}
 \end{figure}
 
+\clearpage
+
 \begin{figure}
 \center{\includegraphics[width=6in]{memusg}}
 
@@ -893,6 +903,8 @@ k-mers inserted compared to all possible k-mers.}
 
 \label{fig:membound}
 \end{figure}
+
+\clearpage
 
 % Memory
 %  use is maximum memory required in gigabytes during partitioning,
@@ -917,6 +929,8 @@ False positive rate & Bits/k-mer \\ \hline
 \label{table:bitskmer}
 \end{table*}
 
+\clearpage
+
 \begin{table}
 \centering
 
@@ -937,7 +951,9 @@ Reads at 15\% & 231,687,063 & 227,157,037 & 1.9 & 113,489,902 & $2.3 \times 10^7
 \label{table:ecoli}
 \end{table}
 
-\begin{table*}
+\clearpage
+
+\begin{table}
 \centering
 \caption{Partitioning results on a soil metagenome at k=31.}
 
@@ -952,7 +968,9 @@ False positive rate & Total memory use (improvement) & Largest partition size in
 \end{tabular*}
 
 \label{table:parts}
-\end{table*}
+\end{table}
+
+\clearpage
 
 \setcounter{figure}{0}
 \makeatletter
@@ -968,6 +986,8 @@ False positive rate & Total memory use (improvement) & Largest partition size in
 
 \label{fig:kindependence}
 \end{figure}
+
+\clearpage
 
 \begin{figure}
 \center{\includegraphics[width=5in]{newpart}}
