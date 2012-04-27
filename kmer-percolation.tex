@@ -7,6 +7,7 @@
 %   @do we want to partition hchc and metahit?
 %%  ref nature methods review
 %   ref SGA
+%   missing edges
 
 \documentclass{pnastwo}
 \pdfoutput=1
@@ -438,9 +439,7 @@ sequencing errors, and the Bloom filter false positive rates have less
 of an effect on branching graph structure than do sequencing errors.
 In addition, the false positives engendered by the Bloom filters are
 uncorrelated with the original sequence, unlike single-base sequencing
-errors which resemble the real sequence.  This feature may further
-reduce the effect of false positives on de Bruijn graph analysis,
-depending on the specific application.
+errors which resemble the real sequence.
 
 Using a probabilistic graph representation with false positive nodes
 and edges raises the specter of systematic graph artifacts resulting
@@ -705,13 +704,13 @@ repository.
 
 We thank Chris Adami, Qingpeng Zhang, and Tracy Teal for thoughtful
 comments, and Jim Cole and Jordan Fish for discussion of future
-applications.  This project was supported by AFRI Competitive Grant
-no. 2010-65205-20361 from the USDA NIFA and NSF IOS-0923812, both to
-CTB.  The MSB2 soil metagenome was sequenced by the DOE's Joint Genome
-Institute through the Great Lakes Bioenergy Research Center
-(DOE BER DE-FC02-07ER64494).
-AH was supported by NSF Postdoctoral Fellowship Award
-\#0905961.
+applications.  In addition, we thank three anonymous reviewers for
+their comments, which substantially improved the paper.  This project
+was supported by AFRI Competitive Grant no. 2010-65205-20361 from the
+USDA NIFA and NSF IOS-0923812, both to CTB.  The MSB2 soil metagenome
+was sequenced by the DOE's Joint Genome Institute through the Great
+Lakes Bioenergy Research Center (DOE BER DE-FC02-07ER64494).  AH was
+supported by NSF Postdoctoral Fellowship Award \#0905961.
 
 % @@ also acknowledge adina
 
