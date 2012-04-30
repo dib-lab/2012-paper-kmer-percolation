@@ -71,7 +71,7 @@ the overall memory requirements for {\em de novo} assembly of
 metagenomes.  On one soil metagenome assembly, this approach achieves
 a nearly 40-fold decrease in the maximum memory requirements for
 assembly.  This probabilistic graph representation is
-a theoretical advance in storing assembly graphs and also yields
+a significant theoretical advance in storing assembly graphs and also yields
 immediate leverage on metagenomic assembly.
 
 \end{abstract}
@@ -140,8 +140,7 @@ storing de Bruijn graphs in memory, based on Bloom filters
 \cite{bloom}.  Bloom filters are fixed-memory probabilistic data
 structures for storing sparse sets; essentially hash tables without
 collision detection, set membership queries on Bloom filters can yield
-false positives -- elements marked as present that do not actually
-exist -- but not false negatives. While Bloom filters have been used
+false positives but not false negatives. While Bloom filters have been used
 in bioinformatics software tools in the past, they have not been used
 for storing assembly
 graphs\cite{bloomref1,bloomref2,bloomref3,bloomref4}. We show that
@@ -187,7 +186,7 @@ Each k-mer serves as a vertex in a graph, with an edge between two
 vertices $N_1$ and $N_2$ if and only if $N_1$ and $N_2$ share a
 (k-1)-mer that is a prefix of $N_1$ and a postfix of $N_2$, or vice
 versa (see Figure \ref{fig:bloomgraph}).  This edge is not stored
-explicitly.
+explicitly, as in the Cortex assembler \cite{cortex}.
 
 Thus each k-mer has up to 8 edges connecting to 8 neighboring k-mers,
 which can be determined by simply building all possible 1-base
@@ -299,7 +298,8 @@ in global connectivity in other graph measures?
 
 To assess global connectivity, we employed the diameter metric in
 graph theory, the length of the ``longest shortest'' path between any
-two vertices~\cite{bondy2008graph}.  If shorter paths were being
+two vertices~\cite{bondy2008graph}.  If shorter paths between real
+k-mers were being
 systematically generated due to false positives, we would expect the
 diameter of components to decrease as the false positive rate
 increased.  We randomly generated 58bp long circular chromosomes (50bp
@@ -312,15 +312,19 @@ higher k values. Furthermore, larger circular chromosomes would be
 more likely to erroneously connect at a fixed $k$, but due to the
 relatively low number of possible 8-mers, we had to keep the
 chromosomes small.  We only considered paths between two real k-mers
-in the dataset.  At each false positive rate, we ran the simulation
-500 times and estimated the mean within a 95\% confidence interval
-using percentile bootstrap. As Figure~\ref{fig:diam} shows, erroneous
-connections between pairs of real k-mers are rare below a false
-positive rate of 20\%.  For false positive rates above this threshold,
-spurious connections between real k-mers are created, which lowers the
+in the dataset.
+
+At each false positive rate, we ran the simulation 500 times and
+estimated the mean within a 95\% confidence interval using percentile
+bootstrap. As Figure~\ref{fig:diam} shows, erroneous connections
+between pairs of real k-mers are rare below a false positive rate of
+20\%.  For false positive rates above this threshold, spurious
+connections between real k-mers are created, which lowers the
 diameter.  Thus, the larger scale graph structure is retained up
 through $p = 0.183$, as suggested by the component size analysis and
-percolation results.
+percolation results.  This demonstrates that as long as the k-mer
+space is only sparsely occupied by false positives, long ``bridges''
+between distant k-mers do not appear spontaneously.
 
 \subsection{Erroneous k-mers from sequencing eclipse graph false positives}
 
@@ -341,8 +345,9 @@ from the same strain (see \emph{Methods}), an exact representation of
 the genome, and inexact representations with different false positive
 rates.
 
-For these comparisons, we used a $k$ value of 17, which allows us to
-use enough a bitmap for exact graph storage, i.e. we have no false
+For these comparisons, we used a $k$ value of 17, for which we can
+store graphs exactly,
+i.e. we have no false
 positives because we can store $4^{17}$ entries precisely in 2GB of
 system memory. This is equivalent to a Bloom filter with one hash
 table and a 0\% false positive rate.  We found a total of 50,605
@@ -358,8 +363,8 @@ positives, comprise the majority of the graph.
 In contrast, when we examined an exact representation of an Illumina
 dataset, only 9.9\% of the k-mers in the graph truly exist in the
 reference genome.  As above, we only counted false positive k-mers
-that are transitively connected to least one real k-mer. The number of
-17-mers with more than 2 neighbors is higher than for the exact
+that are transitively connected to at least one real k-mer. The number of
+17-mers with more than 2 neighbors in the sequencing reads is higher than for the exact
 representation of the genome, which demonstrates that sequencing
 errors add to the complexity of the graph. Overall, the errors
 demonstrated by sequencers dwarf the errors caused by the inexact
