@@ -186,7 +186,9 @@ Each k-mer serves as a vertex in a graph, with an edge between two
 vertices $N_1$ and $N_2$ if and only if $N_1$ and $N_2$ share a
 (k-1)-mer that is a prefix of $N_1$ and a postfix of $N_2$, or vice
 versa (see Figure \ref{fig:bloomgraph}).  This edge is not stored
-explicitly, as in the Cortex assembler \cite{cortex}.
+explicitly, which can lead to false connections when two reads abut
+but do not overlap; these false connections manifest as false positives,
+discussed in detail below.
 
 Thus each k-mer has up to 8 edges connecting to 8 neighboring k-mers,
 which can be determined by simply building all possible 1-base
@@ -578,11 +580,14 @@ a generally useful formalism for sequence analysis. In particular,
 they have been extended to efficient multiple-sequence alignment,
 repeat discovery, and detection of local and structural sequence
 variation \cite{zerbinothesis,zhang2003dna,price2005novo,cortex}.
-We are also exploring the use of de Bruijn graphs for graph-based
-error correction, graph-based homology search, and graph-based
-artifact detection in large sequencing data sets.  The ability to more
-efficiently store assembly graphs in memory will surely result in
-additional uses for de Bruijn graphs.
+
+We are further exploring the use of probabilistic de Bruijn graphs for
+graph-based error correction, graph-based homology search, and
+graph-based artifact detection in large sequencing data sets.  The
+approach used in partitioning, in which we use properties measured
+in the de Bruijn graph to select and extract individual reads based
+on e.g. local graph connectivity or sequence identiy, may generalize
+to a variety of problems.
 
 \begin{materials}
 
