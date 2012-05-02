@@ -1,0 +1,19 @@
+\begin{table}
+\centering
+
+\caption{Effects of loading \emph{E. coli} data at different false positive rates}
+\begin{tabular*}{\hsize}{@{\extracolsep{\fill}}ccccccc}
+\hline
+Graph & Total k-mers & False connected k-mers & \% Real & Deg $> 2$ & Mem (bytes) \\ \hline
+\emph{E. coli} at 0\% & 4,530,123 & 0 & 100 & 50,605 & $2.1 \times 10^{9}$ \\
+\emph{E. coli} at 1\% & 4,814,050 & 283,927 & 94.1 & 313,844 & $5.4 \times 10^6$ \\
+\emph{E. coli} at 5\% & 6,349,301 & 1,819,178 & 71.3 & 1,339,102 & $3.5 \times 10^6$ \\
+\emph{E. coli} at 15\% & 31,109,523 & 26,579,400 & 14.6 & 10,522,482 & $2.2 \times 10^6$ \\
+Reads at 0\% & 45,566,033 & 41,036,029 & 9.9 & 7,699,309 & $2.1 \times 10^{9}$ \\
+Reads at 1\% & 48,182,271 & 43,652,265 & 9.4 & 31,600,208 & $5.4 \times 10^7$ \\
+Reads at 5\% & 62,019,545 & 57,489,537 & 7.3 & 42,642,203 & $3.6 \times 10^7$ \\
+Reads at 15\% & 231,687,063 & 227,157,037 & 1.9 & 113,489,902 & $2.3 \times 10^7$ \\
+\hline
+\end{tabular*}
+\label{table:ecoli}
+\end{table}
