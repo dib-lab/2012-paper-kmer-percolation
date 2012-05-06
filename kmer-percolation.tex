@@ -185,7 +185,7 @@ sparse data sets (see \emph{Methods} for implementation details).
 Each k-mer serves as a vertex in a graph, with an edge between two
 vertices $N_1$ and $N_2$ if and only if $N_1$ and $N_2$ share a
 (k-1)-mer that is a prefix of $N_1$ and a postfix of $N_2$, or vice
-versa (see Figure \ref{fig:bloomgraph}).  This edge is not stored
+versa.  This edge is not stored
 explicitly, which can lead to false connections when two reads abut
 but do not overlap; these false connections manifest as false positives,
 discussed in detail below.
@@ -239,13 +239,13 @@ that are present in the original sequence.  It is visually apparent
 that even a high false positive rate of 15\% does not systematically
 and erroneously connect distant k-mers.
 
-In addition, it is simple to see that a linear increase in the false
-positive rate results in a linear increase in the number of expected
-neighbors for a particular k-mer. For most isolated k-mers (i.e. no
-adjacent ``real'' k-mers), the calculation is E(erroneous neighbors)$
-= 8 \times p_f$. Thus, the local graph structure accretes errors in a
-linear fashion.  Does the global graph structure degrade in a similar
-fashion?
+%In addition, it is simple to see that a linear increase in the false
+%positive rate results in a linear increase in the number of expected
+%neighbors for a particular k-mer. For most isolated k-mers (i.e. no
+%adjacent ``real'' k-mers), the calculation is E(erroneous neighbors)$
+%= 8 \times p_f$. Thus, the local graph structure accretes errors in a
+%linear fashion.  Does the global graph structure degrade in a similar
+%fashion?
 
 \subsection{False long-range connectivity is a nonlinear function of the false positive rate}
 
@@ -500,16 +500,16 @@ apply to the MSB2 data set as well.
 
 % @CTB fill in number
 
-There are several biological problems that are particularly well
-suited to a partitioning approach.  Like metagenomes, transcriptomes
-consist of populations of many {\em disconnected} sequences.  This has
-already been exploited for assembly improvement: Trinity relies on an
-heuristic partitioning approach in the second phase of transcriptome assembly
-\cite{trinity}.  As with MetaVelvet and MetaIDBA, Trinity
-traverses the graph in memory, so the partitioning phase is extremely
-memory intensive for large data sets\cite{metavelvet,pubmed21685107,trinity}.
-The graph representation presented here should be applicable to Trinity
-as well.
+%There are several biological problems that are particularly well
+%suited to a partitioning approach.  Like metagenomes, transcriptomes
+%consist of populations of many {\em disconnected} sequences.  This has
+%already been exploited for assembly improvement: Trinity relies on an
+%heuristic partitioning approach in the second phase of transcriptome assembly
+%\cite{trinity}.  As with MetaVelvet and MetaIDBA, Trinity
+%traverses the graph in memory, so the partitioning phase is extremely
+%memory intensive for large data sets\cite{metavelvet,pubmed21685107,trinity}.
+%The graph representation presented here should be applicable to Trinity
+%as well.
 
 Once partitioned, components can be assembled with parameters chosen
 for the coverage and sequence heterogeneity present in each partition.
@@ -618,44 +618,48 @@ presence of an object in the set. In our variant, we use multiple
 prime-number-sized hash tables, each with a different hash function
 corresponding to the modulus of the DNA bitstring representation with
 the hash table size; this is a computationally convenient way to
-construct hash functions for DNA strings.  The underlying properties
-of the Bloom filter are identical.  To add a k-mer to the filter, the
-corresponding bit in each hash table is set to 1.  To find a k-mer,
-each table is queried for the presence of that k-mer; for a k-mer to
-be considered present in the dataset, the k-mer must be found in all
-of the hash tables.  If a k-mer is not present in any one hash table,
-then it is certainly not in the dataset. This explains the one-sided
-error: false positives are possible but false negatives are not. The
-expected false positive rate is simply the product of the occupancies
-of the hash tables.  As with other hash-style data structures, Bloom
-filters have a fast lookup time, $O(h)$ for $h$ hash tables.  Similar
-to other hash-style data structures for storing k-mers, memory usage
-is independent of the value of $k$.
+construct hash functions for DNA strings.  The properties
+of this implementation are identical to a classical Bloom filter
+\cite{bloomsurvey}.
 
-\section{Calculating Data Structure Properties}
-The properties of our Bloom filter variant are the same as a classical
-Bloom filter \cite{bloomsurvey}.  To calculate the expected false
-positive rate, we take the product of the occupancy of each hash
-table:
-\begin{displaymath}
-P_f = \prod_{h \in H} occ(h)
-\end{displaymath}
-where $h$ is a hash table in the set of hash tables $H$ and $occ$ denotes
-the occupancy (proportion of bits set) for a hash table.
-We find the optimal number of hash tables
-to use by calculating
-\begin{displaymath}
-\vert H \vert_{opt} = \ln 2 \frac{m}{k}
-\end{displaymath}
-where $m$ is the amount of memory in bits to allocate and $k$
-is the number of unique k-mers to be inserted. Finally,
-the number of bits per
-k-mer used in the data structure for the optimal number of hash 
-tables is
+%To add a k-mer to the filter, the
+%corresponding bit in each hash table is set to 1.  To find a k-mer,
+%each table is queried for the presence of that k-mer; for a k-mer to
+%be considered present in the dataset, the k-mer must be found in all
+%of the hash tables.  If a k-mer is not present in any one hash table,
+%then it is certainly not in the dataset. This explains the one-sided
+%error: false positives are possible but false negatives are not. The
+%expected false positive rate is simply the product of the occupancies
+%of the hash tables.
+%As with other hash-style data structures, Bloom
+%filters have a fast lookup time, $O(h)$ for $h$ hash tables.
+%Memory usage
+%is independent of the value of $k$.
 
-\begin{displaymath}
-\frac{m}{n} = \frac{1}{\ln(2)} \log{\frac{1}{P_f}}.
-\end{displaymath}
+%\section{Calculating Data Structure Properties}
+%The properties of our Bloom filter variant are the same as a classical
+%Bloom filter \cite{bloomsurvey}.  To calculate the expected false
+%positive rate, we take the product of the occupancy of each hash
+%table:
+%\begin{displaymath}
+%P_f = \prod_{h \in H} occ(h)
+%\end{displaymath}
+%where $h$ is a hash table in the set of hash tables $H$ and $occ$ denotes
+%the occupancy (proportion of bits set) for a hash table.
+%We find the optimal number of hash tables
+%to use by calculating
+%\begin{displaymath}
+%\vert H \vert_{opt} = \ln 2 \frac{m}{k}
+%\end{displaymath}
+%where $m$ is the amount of memory in bits to allocate and $k$
+%is the number of unique k-mers to be inserted. Finally,
+%the number of bits per
+%k-mer used in the data structure for the optimal number of hash 
+%tables is
+
+%\begin{displaymath}
+%\frac{m}{n} = \frac{1}{\ln(2)} \log{\frac{1}{P_f}}.
+%\end{displaymath}
 
 \section{Estimating False Positive Rate For Erroneous Connectivity}
 We ran a simulation to find when components in the graph begin to
@@ -668,7 +672,6 @@ component and the overall component size distribution for each given
 occupancy rate.  At the occupancy where a ``giant component'' appears,
 this component size distribution should be scale-free
 \cite{stauffer1979scaling}.
-
 We then found at what value of $p$ the resulting component size
 distribution in logarithmic scale can be better fitted in a linear or
 quadratic fashion using the F-statistic
@@ -886,14 +889,14 @@ of the American Mathematical Society}, 54:426--482.
 
 %\clearpage
 
-\begin{figure}
-\centering
-%\includegraphics[width=5in]{bloomgraph}
-\caption{Storing de Bruijn graphs in Bloom filters.  Longer sequences (top left) are broken down into k-mers (bottom left; here, k=6) and stored in the Bloom filter (middle).
-The graph (right) is traversed by starting at a k-mer and then testing all possible 1-base pre- and post-fixes for presence in the Bloom filter.}
+%\begin{figure}
+%\centering
+%%\includegraphics[width=5in]{bloomgraph}
+%\caption{Storing de Bruijn graphs in Bloom filters.  Longer sequences (top left) are broken down into k-mers (bottom left; here, k=6) and stored in the Bloom filter (middle).
+%The graph (right) is traversed by starting at a k-mer and then testing all possible 1-base pre- and post-fixes for presence in the Bloom filter.}
 
-\label{fig:bloomgraph}
-\end{figure}
+%\label{fig:bloomgraph}
+%\end{figure}
 
 %\clearpage
 
