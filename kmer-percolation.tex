@@ -63,7 +63,7 @@ we introduce a memory-efficient graph representation with which we can
 analyze the k-mer connectivity of metagenomic samples.  The graph
 representation is based on a probabilistic data structure, a Bloom
 filter, that allows us to efficiently store assembly graphs in as
-little as 4 bits per k-mer.  We show that this data structure
+little as 4 bits per k-mer, albeit inexactly.  We show that this data structure
 accurately represents DNA assembly graphs in low memory.  We apply
 this data structure to the problem of partitioning assembly graphs
 into components as a prelude to assembly, and show that this reduces
@@ -209,10 +209,12 @@ less accurately: for example, for a false positive rate of 15\%, at
 which 1 in 6 random k-mers tested would be falsely considered present,
 each real k-mer can be stored in under 4 bits of memory (see
 %Table~\ref{table:bitskmer}
-Table 1).
+Table 1).  While there are many false k-mers, they only matter if they
+connect to a real k-mer.
 
-Using a probabilistic data structure to store k-mer nodes does cause
-one potential problem: in contrast to an exact graph storage, there is
+The false positive rate inherent in Bloom filters thus raises one concern
+for graph storage:
+in contrast to an exact graph storage, there is
 a chance that a k-mer will be adjacent to a false positive k-mer.
 That is, a k-mer may connect to another k-mer that does not actually
 exist in the original dataset but nonetheless registers as present,
@@ -232,8 +234,9 @@ positive rates.  After storing this single sequence in compressible
 graphs using $k=31$ with four different false positive rates
 ($p_f$=0.01, 0.05, 0.10, and 0.15), we explored the graph using
 breadth-first search beginning at the first 31-mer.  The graphs in
-Figure \ref{fig:circles} illustrate how the local graph structure
-elaborates with the false positive rate while the overall circular
+Figure \ref{fig:circles} illustrate how the graphs connected to
+the original k-mers
+elaborate with the false positive rate while the overall circular
 graph structure remains, with no erroneous shortcuts between k-mers
 that are present in the original sequence.  It is visually apparent
 that even a high false positive rate of 15\% does not systematically
@@ -363,11 +366,12 @@ expected linear fashion.
 %component.
 Furthermore, the number of real 17-mers, those that are not false
 positives, comprise the majority of the graph.
+(As above, we only counted false positive k-mers
+that are transitively connected to at least one real k-mer.)
 
 In contrast, when we examined an exact representation of an Illumina
 dataset, only 9.9\% of the k-mers in the graph truly exist in the
-reference genome.  As above, we only counted false positive k-mers
-that are transitively connected to at least one real k-mer. The number of
+reference genome.   The number of
 17-mers with more than 2 neighbors in the sequencing reads is higher than for the exact
 representation of the genome, which demonstrates that sequencing
 errors add to the complexity of the graph. Overall, the errors
@@ -718,7 +722,7 @@ order.
 We have implemented this compressible graph representation and the
 associated partitioning algorithm in a software package named khmer.
 It is written in C++ and Python 2.6 and is available under the BSD
-open source license at https://github.com/ctb/khmer.  The graphviz
+open source license at https://github.com/ged-lab/khmer.  The graphviz
 software package was used for graph visualizations. The scripts to
 generate the figures of this paper are available in the khmer
 repository.
